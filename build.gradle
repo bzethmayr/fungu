@@ -1,0 +1,28 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+}
+
+group 'net.zethmayr.fungu'
+version '1.0-SNAPSHOT'
+description 'Functional Glue'
+
+static boolean isLocal(final String version) {
+    return version.endsWith('SNAPSHOT')
+}
+
+repositories {
+    if (isLocal(version)) {
+        mavenLocal()
+    }
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'net.zethmayr.fungu:fungu-test:1.0+'
+}
+
+final String incFmt1 = "gradle/%s.gradle"
+apply from: String.format(incFmt1, 'jetbrains')
+apply from: String.format(incFmt1, 'test')
+apply from: String.format(incFmt1, 'publish')

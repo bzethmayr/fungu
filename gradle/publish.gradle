@@ -1,0 +1,61 @@
+publishing {
+    repositories {
+        if (isLocal(version)) {
+            mavenLocal()
+        } else {
+            mavenCentral()
+        }
+    }
+    publications {
+        maven(MavenPublication) {
+            groupId = rootProject.group
+            artifactId = rootProject.name
+            version = rootProject.version
+
+            from components.java
+
+            versionMapping {
+                usage('java-api') {
+                    fromResolutionOf('runtimeClasspath')
+                }
+                usage('java-runtime') {
+                    fromResolutionResult()
+                }
+            }
+//            pom {
+//                name = rootProject.name
+//                description = rootProject.description
+//                url = 'http://www.example.com/library'
+//                properties = [
+//                ]
+//                licenses {
+//                    license {
+//                        name = 'The Apache License, Version 2.0'
+//                        url = '/license.md'
+//                    }
+//                }
+//                developers {
+//                    developer {
+//                        id = 'bzeth'
+//                        name = 'Ben Zethmayr'
+//                        email = 'gribnitt@gmail.com'
+//                    }
+//                }
+//                scm {
+//                    connection = 'scm:git:git://example.com/my-library.git'
+//                    developerConnection = 'scm:git:ssh://example.com/my-library.git'
+//                    url = 'http://example.com/my-library/'
+//                }
+//            }
+        }
+    }
+}
+
+tasks.withType(Jar).configureEach {
+    dependsOn test
+    dependsOn javadoc
+}
+
+tasks.withType(PublishToMavenRepository).configureEach {
+    enabled = !isLocal(version)
+}
