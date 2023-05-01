@@ -1,3 +1,5 @@
+final String devId = 'bzethmayr'
+
 publishing {
     repositories {
         if (isLocal(version)) {
@@ -22,31 +24,29 @@ publishing {
                     fromResolutionResult()
                 }
             }
-//            pom {
-//                name = rootProject.name
-//                description = rootProject.description
-//                url = 'http://www.example.com/library'
-//                properties = [
-//                ]
-//                licenses {
-//                    license {
-//                        name = 'The Apache License, Version 2.0'
-//                        url = '/license.md'
-//                    }
-//                }
-//                developers {
-//                    developer {
-//                        id = 'bzeth'
-//                        name = 'Ben Zethmayr'
-//                        email = 'gribnitt@gmail.com'
-//                    }
-//                }
-//                scm {
-//                    connection = 'scm:git:git://example.com/my-library.git'
-//                    developerConnection = 'scm:git:ssh://example.com/my-library.git'
-//                    url = 'http://example.com/my-library/'
-//                }
-//            }
+            pom {
+                name = rootProject.name
+                description = rootProject.description
+                url = "https://github.com/${devId}/${rootProject.name}"
+                licenses {
+                    license {
+                        name = 'The 2-Clause BSD License'
+                        url = '/license.md'
+                    }
+                }
+                developers {
+                    developer {
+                        id = devId
+                        name = 'Ben Zethmayr'
+                        email = 'gribnitt@gmail.com'
+                    }
+                }
+                scm {
+                    connection = "scm:git:https://github.com/${devId}/${rootProject.name}.git"
+                    developerConnection = "scm:git:https://github.com/${devId}/${rootProject.name}.git"
+                    url = "https://github.com/${devId}/${rootProject.name}/"
+                }
+            }
         }
     }
 }
