@@ -4,6 +4,7 @@ import net.zethmayr.fungu.throwing.Sink;
 import net.zethmayr.fungu.throwing.ThrowingConsumer;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -64,9 +65,9 @@ public abstract class CountedReference<T extends Closeable> implements AutoClose
      * per the convention that the resource will account for all of its own disposal.
      * If this is not entirely the case, this method can be overridden.
      * @param resource a resource to dispose of
-     * @throws Exception if resource disposal fails.
+     * @throws IOException if resource disposal fails.
      */
-    protected void disposeResource(final T resource) throws Exception {
+    protected void disposeResource(final T resource) throws IOException {
         resource.close();
     }
 
@@ -94,11 +95,11 @@ public abstract class CountedReference<T extends Closeable> implements AutoClose
         maybeRef()
                 .map(CountAndRef::decrementedZero)
                 .map(CountAndRef::getResource)
-                .ifPresent(sinking((ThrowingConsumer<T>)this::internalDispose, closeThrew));
+                .ifPresent(sinking((ThrowingConsumer<T, IOException>)this::internalDispose, closeThrew));
         closeThrew.raise();
     }
 
-    private void internalDispose(final T resource) throws Exception {
+    private void internalDispose(final T resource) throws IOException {
         countAndRef().remove();
         disposeResource(resource);
     }

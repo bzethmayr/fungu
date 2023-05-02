@@ -10,7 +10,7 @@ import java.util.function.Consumer;
  *
  * @param <S> the non-throwing functional interface.
  */
-public interface Sinkable<S> {
+public interface Sinkable<S, E extends Exception> {
 
     /**
      * Returns an analogue which
@@ -31,7 +31,7 @@ public interface Sinkable<S> {
      * @param <S>      the non-throwing functional interface.
      * @return a non-throwing analogue.
      */
-    static <S> S sinking(final Sinkable<S> throwing, final Consumer<Exception> sink) {
+    static <S, E extends Exception> S sinking(final Sinkable<S, E> throwing, final Consumer<Exception> sink) {
         return throwing.sinking(sink);
     }
 }

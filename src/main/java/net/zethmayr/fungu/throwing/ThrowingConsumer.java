@@ -9,15 +9,15 @@ import java.util.function.Consumer;
  * @param <T> the consumed type.
  */
 @FunctionalInterface
-public interface ThrowingConsumer<T> extends Sinkable<Consumer<T>> {
+public interface ThrowingConsumer<T, E extends Exception> extends Sinkable<Consumer<T>, E> {
 
     /**
      * Takes a single value.
      * This is the throwing analogue of {@link Consumer#accept}.
      * @param value a value.
-     * @throws Exception per implementation.
+     * @throws E per implementation.
      */
-    void accept(final T value) throws Exception;
+    void accept(final T value) throws E;
 
     /**
      * {@inheritDoc}
