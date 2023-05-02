@@ -22,10 +22,10 @@ public final class UponHelper {
     }
 
     @SafeVarargs
-    public static <T> T throwingUpon(
-            final T target, final ThrowingConsumer<? super T>... changes
-    ) throws Exception {
-        for (final ThrowingConsumer<? super T> change : changes) {
+    public static <T, E extends Exception> T throwingUpon(
+            final T target, final ThrowingConsumer<? super T, E>... changes
+    ) throws E {
+        for (final ThrowingConsumer<? super T, E> change : changes) {
             change.accept(target);
         }
         return target;

@@ -32,19 +32,38 @@ public interface EditsX extends HasX, SetsX {
         return e -> copierFunction.accept(editable.cast(this), e);
     }
 
+    /**
+     * Returns a copier for a given editable scope.
+     * @param editable the editable type.
+     * @param fieldType the (optional) field type.
+     * @return a bi-consumer copying fields from the first to the second argument.
+     * @param <E> the editable type.
+     * @param <T> the (optional) field type.
+     */
     static <E extends EditsX, T> BiConsumer<E, E> getCopyFunction(
             final Class<E> editable, final Class<T> fieldType
     ) {
         return CopierWiring.INSTANCE.getCopyFunction(editable);
     }
 
+    /**
+     * Runs the provided generator to register an editable class's copier,
+     * if none is already present.
+     *
+     * @param editable the editable class.
+     * @param copierGenerator a copier generating method.
+     * @param <E> the editable type.
+     * @param <T> the (optional) field type.
+     */
     static <E extends EditsX, T> void registerCopyFunction(
             final Class<E> editable, final Supplier<BiConsumer<E, E>> copierGenerator
     ) {
         CopierWiring.INSTANCE.registerCopyFunction(editable, copierGenerator);
     }
 
-
+    /**
+     * Registrar for editable class copiers.
+     */
     enum CopierWiring {
         INSTANCE;
 

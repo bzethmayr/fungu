@@ -4,6 +4,7 @@ import net.zethmayr.fungu.throwing.ThrowingConsumer;
 import org.junit.jupiter.api.Test;
 
 import java.io.Closeable;
+import java.io.IOException;
 
 import static net.zethmayr.fungu.CloseableFactory.closeIntercepted;
 import static net.zethmayr.fungu.CloseableFactory.closeable;
@@ -73,7 +74,7 @@ public class CloseableFactoryTest {
                 return closed;
             }
         }
-        final ThrowingConsumer<TestResource> interceptor = r -> {
+        final ThrowingConsumer<TestResource, IOException> interceptor = r -> {
         };
 
         final TestResource realResource = new TestResource();
