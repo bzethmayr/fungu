@@ -19,7 +19,7 @@ repositories {
 }
 
 dependencies {
-    testImplementation 'net.zethmayr.fungu:fungu-test:1.0.1+'
+    testImplementation 'net.zethmayr.fungu:fungu-test:1.0.2+'
 }
 
 final String incFmt1 = "gradle/%s.gradle"
