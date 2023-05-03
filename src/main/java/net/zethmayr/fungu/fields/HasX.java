@@ -8,6 +8,8 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import static net.zethmayr.fungu.core.ExceptionFactory.becauseUnsupported;
+
 /**
  * Meta-interface for interfaces defining field getters.
  * Provides access to the getter method(s).
@@ -114,7 +116,7 @@ public interface HasX {
          */
         <H extends HasX, T> Function<H, T> getGetFunction(final Class<H> declaring) {
             return Optional.ofNullable((Function<H, T>) getters.get(declaring))
-                    .orElseThrow(ExceptionFactory.unsupportedBecause("no getter for %s in %s", declaring, getters));
+                    .orElseThrow(() -> becauseUnsupported("no getter for %s in %s", declaring, getters));
         }
     }
 }

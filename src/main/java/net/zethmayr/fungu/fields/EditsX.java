@@ -7,6 +7,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.*;
 
+import static net.zethmayr.fungu.core.ExceptionFactory.becauseUnsupported;
+import static net.zethmayr.fungu.core.ExceptionFactory.unsupportedBecause;
+import static net.zethmayr.fungu.core.SupplierFactory.from;
+
 /**
  * Provides facilities for copying field values.
  */
@@ -65,6 +69,9 @@ public interface EditsX extends HasX, SetsX {
      * Registrar for editable class copiers.
      */
     enum CopierWiring {
+        /**
+         * Singleton instance.
+         */
         INSTANCE;
 
         private final ConcurrentMap<Class<?>, BiConsumer<? extends EditsX, ? extends EditsX>> copiers =
@@ -74,7 +81,7 @@ public interface EditsX extends HasX, SetsX {
                 final Class<E> declaring
         ) {
             return  Optional.ofNullable((BiConsumer<E, E>) copiers.get(declaring))
-                    .orElseThrow(ExceptionFactory.unsupportedBecause("no copier for %s in %s", declaring, copiers));
+                    .orElseThrow(() -> becauseUnsupported("no copier for %s in %s", declaring, copiers));
         }
 
         <E extends EditsX> void registerCopyFunction(

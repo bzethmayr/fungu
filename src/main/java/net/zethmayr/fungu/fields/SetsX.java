@@ -1,13 +1,13 @@
 package net.zethmayr.fungu.fields;
 
-import net.zethmayr.fungu.core.ExceptionFactory;
-
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+
+import static net.zethmayr.fungu.core.ExceptionFactory.becauseUnsupported;
 
 /**
  * Meta-interface for interfaces defining field setters.
@@ -56,7 +56,7 @@ public interface SetsX {
                 final Class<S> declaring
         ) {
             return Optional.ofNullable((BiConsumer<S, T>) setters.get(declaring))
-                    .orElseThrow(ExceptionFactory.unsupportedBecause("no setter for %s in %s", declaring, setters));
+                    .orElseThrow(() -> becauseUnsupported("no setter for %s in %s", declaring, setters));
         }
     }
 }
