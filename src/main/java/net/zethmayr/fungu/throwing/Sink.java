@@ -5,18 +5,18 @@ import java.util.function.Consumer;
 /**
  * Defers an exception to allow functional composition.
  */
-public interface Sink extends Consumer<Exception> {
+public interface Sink<E extends Exception> extends Consumer<E> {
 
     /**
      * Receives exceptions from sinkable implementations.
      * @param thrown an exception.
      */
     @Override
-    void accept(final Exception thrown);
+    void accept(final E thrown);
 
     /**
      * Throws received exceptions.
-     * @throws Exception received from sinkable implementation.
+     * @throws E received from sinkable implementation.
      */
-    void raise() throws Exception;
+    void raise() throws E;
 }

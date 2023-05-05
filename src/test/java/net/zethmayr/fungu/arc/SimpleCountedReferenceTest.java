@@ -8,7 +8,7 @@ import java.io.Closeable;
 import static net.zethmayr.fungu.test.TestConstants.TEST_RANDOM;
 import static org.junit.jupiter.api.Assertions.*;
 
-class CountedReferenceTest {
+class SimpleCountedReferenceTest {
 
     /**
      * Models some general aspects of resources for test purposes.
@@ -46,7 +46,7 @@ class CountedReferenceTest {
         }
     }
 
-    private static class TestCountedReference extends CountedReference<TestResource> {
+    private static class TestSimpleCountedReference extends SimpleCountedReference<TestResource> {
 
         private boolean alreadyCreated;
 
@@ -79,7 +79,7 @@ class CountedReferenceTest {
          */
         TestResource resource;
 
-        try (final TestCountedReference handle = new TestCountedReference()) {
+        try (final TestSimpleCountedReference handle = new TestSimpleCountedReference()) {
             resource = handle.getResource();
             assertFalse(resource.isClosed());
         }
@@ -95,10 +95,10 @@ class CountedReferenceTest {
          */
         TestResource resource;
 
-        try (final TestCountedReference outer = new TestCountedReference()) {
+        try (final TestSimpleCountedReference outer = new TestSimpleCountedReference()) {
             resource = outer.getResource();
             final int outerValue = resource.getValue();
-            try (final TestCountedReference inner = new TestCountedReference()) {
+            try (final TestSimpleCountedReference inner = new TestSimpleCountedReference()) {
 
                 final TestResource innerResource = inner.getResource();
                 assertSame(resource, innerResource);
@@ -113,7 +113,7 @@ class CountedReferenceTest {
     void countedReference_whenResourceIsClosed_closeIsDuplicate() {
 
         assertThrows(IllegalStateException.class, () -> {
-            try (final TestCountedReference underTest = new TestCountedReference()) {
+            try (final TestSimpleCountedReference underTest = new TestSimpleCountedReference()) {
                 final TestResource resource = underTest.getResource();
                 assertFalse(resource.isClosed());
                 resource.close();

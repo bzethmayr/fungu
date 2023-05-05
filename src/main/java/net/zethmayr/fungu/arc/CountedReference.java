@@ -8,31 +8,24 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static net.zethmayr.fungu.core.ExceptionFactory.nonexistentBecause;
-import static net.zethmayr.fungu.core.SupplierFactory.from;
 import static net.zethmayr.fungu.throwing.SinkFactory.sink;
 import static net.zethmayr.fungu.throwing.Sinkable.sinking;
 
 /**
  * A counted reference controls access to a resource
  * of which only one is needed per thread.
- * The resource itself is closed when the last reference is closed.
+ * Each new instance of a counted reference increments the reference count.
+ * The resource itself is opened with the first reference,
+ * and closed when the last reference is closed.
  *
  * @param <T> the resource type.
  */
-public abstract class CountedReference<T extends Closeable> implements AutoCloseable {
+
+public abstract class CountedReference<T> implements AutoCloseable {
 
     /**
-     * Creates a new thread-local for static use by implementations.
-     * @return a new, empty thread-local
-     * @param <T> the resource type.
-     */
-    protected static <T extends Closeable> ThreadLocal<CountAndRef<T>> newLocalCount() {
-        return new ThreadLocal<>();
-    }
-
-    /**
-     * Each new instance of a given counted ref increases the reference count.
+     * Creates a new open counted reference to the open resource
+     * and increments the reference count.
      */
     protected CountedReference() {
         maybeRef()
@@ -46,8 +39,70 @@ public abstract class CountedReference<T extends Closeable> implements AutoClose
     }
 
     /**
+     * Returns the local count and internal reference.
+     *
+     * @return the local count and reference, if present.
+     */
+    protected Optional<CountAndRef<T>> maybeRef() {
+        return Optional.of(countAndRef())
+                .map(ThreadLocal::get);
+    }
+
+    /**
+     * After the last usage,
+     * removes the local counter and disposes of the resource.
+     *
+     * @param resource the real resource
+     * @throws IOException as thrown by {@literal e.g.} {@link Closeable#close()}.
+     */
+    protected void internalDispose(final T resource) throws IOException {
+        countAndRef().remove();
+        disposeResource(resource);
+    }
+
+    /**
+     * By default,
+     * calls {@link #decrementUsage(T)}.
+     *
+     * @throws IOException as thrown by {@literal e.g.} the resource {@link Closeable#close()} method.
+     */
+    @Override
+    public void close() throws IOException {
+        decrementUsage(null);
+    }
+
+    /**
+     * Closes this reference and decrements the count,
+     * closing the real resource when the count reaches zero.
+     * It may be useful to proxy the real resource such that
+     * the exposed close method calls this method.
+     *
+     * @param ignored an ignored resource reference, as required by {@link ThrowingConsumer}
+     * @throws IOException as thrown by {@literal e.g.} the resource {@link Closeable#close()} method.
+     */
+    protected final void decrementUsage(final T ignored) throws IOException {
+        final Sink<IOException> closeThrew = sink();
+        maybeRef()
+                .map(CountAndRef::decrementedZero)
+                .map(CountAndRef::getResource)
+                .ifPresent(sinking((ThrowingConsumer<T, IOException>) this::internalDispose, closeThrew));
+        closeThrew.raise();
+    }
+
+    /**
+     * Creates a new thread-local for static use by implementations.
+     *
+     * @param <T> the resource type.
+     * @return a new, empty thread-local
+     */
+    public static <T extends Closeable> ThreadLocal<CountAndRef<T>> newLocalCount() {
+        return new ThreadLocal<>();
+    }
+
+    /**
      * Returns a consistent reference to a compatible thread-local,
      * which should be statically defined.
+     *
      * @return the thread-local
      */
     protected abstract ThreadLocal<CountAndRef<T>> countAndRef();
@@ -60,61 +115,28 @@ public abstract class CountedReference<T extends Closeable> implements AutoClose
     protected abstract T createResource();
 
     /**
-     * Called when the last reference is closed.
-     * By default, just calls {@link Closeable#close()} on the resource,
-     * per the convention that the resource will account for all of its own disposal.
-     * If this is not entirely the case, this method can be overridden.
-     * @param resource a resource to dispose of
-     * @throws IOException if resource disposal fails.
-     */
-    protected void disposeResource(final T resource) throws IOException {
-        resource.close();
-    }
-
-    /**
-     * Returns a reference to the resource for use,
+     * Returns a reference to the open resource for use,
      * without incrementing the count.
+     *
      * @return the resource.
      */
-    public T getResource() {
-        return maybeRef()
-                .map(CountAndRef::getResource)
-                .orElseThrow(nonexistentBecause("Resource not open in %s", from(this)));
-    }
+    public abstract T getResource();
 
     /**
-     * Closes this reference and decrements the count,
-     * closing the real resource when the count reaches zero.
-     * It is often useful to proxy the real resource such that
-     * the exposed close method calls this method.
-     * @throws Exception as thrown by the resource {@link Closeable#close()} method.
+     * Called when the last reference is closed,
+     * to dispose of the real resource.
+     *
+     * @param resource the resource
+     * @throws IOException as thrown by {@literal e.g.} {@link Closeable#close}
      */
-    @Override
-    public final void close() throws Exception {
-        final Sink closeThrew = sink();
-        maybeRef()
-                .map(CountAndRef::decrementedZero)
-                .map(CountAndRef::getResource)
-                .ifPresent(sinking((ThrowingConsumer<T, IOException>)this::internalDispose, closeThrew));
-        closeThrew.raise();
-    }
-
-    private void internalDispose(final T resource) throws IOException {
-        countAndRef().remove();
-        disposeResource(resource);
-    }
-
-    private Optional<CountAndRef<T>> maybeRef() {
-        return Optional.of(countAndRef())
-                .map(ThreadLocal::get);
-    }
+    protected abstract void disposeResource(final T resource) throws IOException;
 
     /**
      * Holds the resource and count while a resource is in use.
      *
      * @param <T> the resource type
      */
-    protected static final class CountAndRef<T extends Closeable> {
+    protected static final class CountAndRef<T> {
         private final AtomicLong count = new AtomicLong(1L);
 
         private final T resource;

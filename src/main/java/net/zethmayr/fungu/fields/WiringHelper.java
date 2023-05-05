@@ -11,17 +11,30 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static java.util.Objects.nonNull;
-import static java.util.function.Predicate.not;
 
+/**
+ * Registers field interface supporting instances.
+ */
 public final class WiringHelper {
     private WiringHelper() {
         throw ExceptionFactory.becauseStaticsOnly();
     }
 
+    /**
+     * Finds getter-like methods associated with the given class
+     * and provides them to the given handler.
+     * Methods are considered getter-like if they
+     * take no argument and return a value
+     * and either are the only methods for the class
+     * or are annotated with {@link Gets}.
+     *
+     * @param encountered   a class.
+     * @param getterHandler the handler.
+     * @param <H>           the class type.
+     */
     public static <H extends HasX> void findGetters(final Class<H> encountered, final BiConsumer<Class<? extends HasX>, Method> getterHandler) {
         final Method[] candidates = Stream.of(encountered.getMethods())
                 .filter(m -> m.getDeclaringClass() == encountered)
@@ -38,15 +51,29 @@ public final class WiringHelper {
                 .forEach(i -> findGetters(canHas(i), getterHandler));
     }
 
-    public static <H extends HasX, T> BiConsumer<Class<? extends H>, Method> wiresGetter(final Lookup permissions) {
+    private static <H extends HasX, T> BiConsumer<Class<? extends H>, Method> wiresGetter(final Lookup permissions) {
         return (c, m) -> HasX.registerGetFunction(c, () -> getterInvoker(convertMethod(m, permissions)));
     }
 
+    /**
+     * Wires getters
+     * associated with the given class's field interfaces.
+     *
+     * @param declaring a class.
+     * @param <H>       the gettable type.
+     */
     public static <H extends HasX> void wireGetters(final Class<H> declaring) {
         final Lookup permissions = MethodHandles.lookup();
         findGetters(declaring, wiresGetter(permissions));
     }
 
+    /**
+     * Wires setters
+     * associated with the given class's field interfaces.
+     *
+     * @param declaring a class.
+     * @param <S>       the settable type.
+     */
     public static <S extends SetsX> void wireSetters(final Class<S> declaring) {
         final Lookup permissions = MethodHandles.lookup();
         final Method[] candidates = Stream.of(declaring.getMethods())
@@ -64,6 +91,13 @@ public final class WiringHelper {
                 .forEach(i -> wireSetters(canSets(i)));
     }
 
+    /**
+     * Wires getters and setters
+     * associated with the given class's field interface(s).
+     *
+     * @param declaring a class.
+     * @param <E>       the editable type.
+     */
     public static <E extends EditsX> void wireField(final Class<E> declaring) {
         wireGetters(declaring);
         wireSetters(declaring);
@@ -99,31 +133,20 @@ public final class WiringHelper {
         }
     }
 
+    /**
+     * Wires copiers for the given class's editable field(s).
+     *
+     * @param editable   a class.
+     * @param fieldClass the field type (optional).
+     * @param <E>        the editable type.
+     * @param <T>        the field type.
+     */
     public static <E extends EditsX, T> void wireCopier(final Class<E> editable, final T fieldClass) {
         registerCopiers(editable);
     }
 
     private static <E extends EditsX> void registerCopiers(final Class<E> editable) {
         registerCopiers(editable, new EditableStack());
-    }
-
-    private static FieldInterfaces getCapabilityParents(
-            final Class<?> editable,
-            final Predicate<Class<?>> isHas,
-            final Predicate<Class<?>> isSets
-    ) {
-        return Stream.of(editable.getInterfaces())
-                .filter(not(EditsX.class::equals))
-                .collect(FieldInterfaces::new,
-                        (r, i) -> {
-                            if (isHas.test(i)) {
-                                r.addGettable(canHas(i));
-                            }
-                            if (isSets.test(i)) {
-                                r.addSettable(canSets(i));
-                            }
-                        },
-                        FieldInterfaces::addAll);
     }
 
     private static <H extends HasX> Class<H> canHas(final Class<?> doesHas) {
@@ -142,7 +165,7 @@ public final class WiringHelper {
      * Registers the copier(s) for a given class's field interface(s).
      *
      * @param visited the class or interface being looked at
-     * @param stack the stack for this recursive call
+     * @param stack   the stack for this recursive call
      */
     private static void registerCopiers(final Class<?> visited, final EditableStack stack) {
         // when a class had HasX as direct parent, it was a single field
@@ -179,8 +202,6 @@ public final class WiringHelper {
          * Concretion might also be marked with any of the lower-level markers.
          * Unrelated interfaces may be present
          */
-//            final FieldInterfaces capabilities = getCapabilityParents(
-//                    editable, HasX.class::isAssignableFrom, SetsX.class::isAssignableFrom);
         if (visited == HasX.class) {
             stack.pointed.pokeGettable(stack.pointed.handled);
         } else if (visited == SetsX.class) {

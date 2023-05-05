@@ -2,6 +2,9 @@ package net.zethmayr.fungu.core;
 
 import static net.zethmayr.fungu.core.SuppressionConstants.LiteralValues.UNCHECKED;
 
+/**
+ * Defines constants used to document uses of {@link SuppressWarnings}.
+ */
 public class SuppressionConstants {
 
     private SuppressionConstants() {

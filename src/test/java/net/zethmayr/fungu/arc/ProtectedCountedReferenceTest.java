@@ -5,9 +5,9 @@ import org.junit.jupiter.api.Test;
 import static net.zethmayr.fungu.core.ExceptionFactory.becauseImpossible;
 import static org.junit.jupiter.api.Assertions.*;
 
-class SafeCountedReferenceTest {
+class ProtectedCountedReferenceTest {
 
-    private static class TestCountedReference extends SafeCountedReference<Testable> {
+    private static class TestCountedReference extends ProtectedCountedReference<Testable> {
 
         public TestCountedReference() {
             super(Testable.class);
