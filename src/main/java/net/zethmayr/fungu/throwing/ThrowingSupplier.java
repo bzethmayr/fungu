@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 
 /**
  * The throwing analogue of {@link Supplier}
+ *
  * @param <T> the supplied type.
  * @param <E> the exception type.
  */
@@ -13,9 +14,16 @@ public interface ThrowingSupplier<T, E extends Exception> extends Sinkable<Suppl
     /**
      * Provides a value.
      * This is the throwing analogue of {@link Supplier#get()}
+     *
+     * @return a value.
+     * @throws E when something goes wrong.
      */
     T get() throws E;
 
+    /**
+     * {@inheritDoc}
+     * Supplies null when an exception was thrown.
+     */
     @Override
     default Supplier<T> sinking(final Consumer<E> sink) {
         return () -> {
