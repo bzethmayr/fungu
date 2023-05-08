@@ -23,12 +23,12 @@ public interface ThrowingConsumer<T, E extends Exception> extends Sinkable<Consu
      * {@inheritDoc}
      */
     @Override
-    default Consumer<T> sinking(final Consumer<Exception> sink) {
+    default Consumer<T> sinking(final Consumer<E> sink) {
         return t -> {
             try {
                 this.accept(t);
             } catch (final Exception thrown) {
-                sink.accept(thrown);
+                sink.accept((E)thrown);
             }
         };
     }

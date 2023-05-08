@@ -13,11 +13,6 @@ import static java.util.Objects.nonNull;
  * @param <E> the exception type
  */
 public interface Result<T, E extends Exception> {
-    /*
-     * Semantics look incomplete. I must have started this and got distracted.
-     * Might be in a similar locus as {@link net.zethmayr.fungu.throwing.Sink}.
-     */
-
     /**
      * Returns a result if one is present.
      * In the case where the result is null as the result of successful evaluation,
