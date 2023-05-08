@@ -4,47 +4,13 @@ import net.zethmayr.fungu.core.ExceptionFactory;
 import org.junit.jupiter.api.Test;
 
 import java.io.Closeable;
+import java.io.IOException;
 
+import static net.zethmayr.fungu.core.ExceptionFactory.becauseImpossible;
 import static net.zethmayr.fungu.test.TestConstants.TEST_RANDOM;
 import static org.junit.jupiter.api.Assertions.*;
 
-class SimpleCountedReferenceTest {
-
-    /**
-     * Models some general aspects of resources for test purposes.
-     */
-    private static class TestResource implements Closeable {
-
-        /**
-         * A resource reference might refer to a closed and therefore invalid resource.
-         */
-        private boolean isClosed;
-
-        /**
-         * Each resource obtained refers to unique state.
-         */
-        private final int value = TEST_RANDOM.nextInt();
-
-        @Override
-        public void close() {
-            /*
-             * Real implementations often ignore duplicate close,
-             * but this increases test stricture.
-             */
-            if (isClosed) {
-                throw ExceptionFactory.becauseImpossible("Already closed");
-            }
-            isClosed = true;
-        }
-
-        public boolean isClosed() {
-            return isClosed;
-        }
-
-        public int getValue() {
-            return value;
-        }
-    }
+class SimpleCountedReferenceTest implements TestsCountedReference<TestResource, SimpleCountedReference<TestResource>> {
 
     private static class TestSimpleCountedReference extends SimpleCountedReference<TestResource> {
 
@@ -64,22 +30,28 @@ class SimpleCountedReferenceTest {
              * a counted reference is already intended to avoid doing this more than once.
              */
             if (alreadyCreated) {
-                throw ExceptionFactory.becauseImpossible("Already opened");
+                throw becauseImpossible("Already opened");
             }
             alreadyCreated = true;
             return new TestResource();
         }
     }
 
+    @Override
+    public TestSimpleCountedReference newReference() {
+        return new TestSimpleCountedReference();
+    }
+
     @Test
-    void countedReference_whenOpenedAndClosed_closesResourceOnce() throws Exception {
+    @Override
+    public void countedReference_whenOpenedAndClosed_closesResourceOnce() throws IOException {
         /*
          * Disclaimer - it is generally inadvisable to
          * leak the resource reference from within a try-with-resources.
          */
         TestResource resource;
 
-        try (final TestSimpleCountedReference handle = new TestSimpleCountedReference()) {
+        try (final TestSimpleCountedReference handle = newReference()) {
             resource = handle.getResource();
             assertFalse(resource.isClosed());
         }
@@ -87,18 +59,20 @@ class SimpleCountedReferenceTest {
         assertTrue(resource.isClosed());
     }
 
+
     @Test
-    void countedReference_whenOpenedTwiceAndClosedTwice_closesOneResourceOnce() throws Exception {
+    @Override
+    public void countedReference_whenOpenedTwiceAndClosedTwice_closesOneResourceOnce() throws IOException {
         /*
          * Disclaimer - it is generally inadvisable to
          * leak the resource reference from within a try-with-resources.
          */
         TestResource resource;
 
-        try (final TestSimpleCountedReference outer = new TestSimpleCountedReference()) {
+        try (final TestSimpleCountedReference outer = newReference()) {
             resource = outer.getResource();
             final int outerValue = resource.getValue();
-            try (final TestSimpleCountedReference inner = new TestSimpleCountedReference()) {
+            try (final TestSimpleCountedReference inner = newReference()) {
 
                 final TestResource innerResource = inner.getResource();
                 assertSame(resource, innerResource);
@@ -110,7 +84,7 @@ class SimpleCountedReferenceTest {
     }
 
     @Test
-    void countedReference_whenResourceIsClosed_closeIsDuplicate() {
+    public void countedReference_whenResourceIsClosed_closeIsDuplicate() {
 
         assertThrows(IllegalStateException.class, () -> {
             try (final TestSimpleCountedReference underTest = new TestSimpleCountedReference()) {

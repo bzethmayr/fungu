@@ -29,4 +29,10 @@ public class SuppressionConstants {
      * This cast will always succeed, the check is irrelevant.
      */
     public static final String CHECK_ASSURED = UNCHECKED;
+
+    /**
+     * This cast is only assured by local convention -
+     * this code should be private.
+     */
+    public static final String LOCAL_CONVENTION = UNCHECKED;
 }

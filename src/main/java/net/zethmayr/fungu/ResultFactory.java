@@ -1,8 +1,12 @@
 package net.zethmayr.fungu;
 
+import net.zethmayr.fungu.throwing.Sink;
+import net.zethmayr.fungu.throwing.SinkFactory;
+import net.zethmayr.fungu.throwing.ThrowingRunnable;
+import net.zethmayr.fungu.throwing.ThrowingSupplier;
+
 import java.util.function.Supplier;
 
-import static net.zethmayr.fungu.ForkFactory.forkOf;
 import static net.zethmayr.fungu.core.ExceptionFactory.becauseAdaptersOnly;
 
 /**
@@ -14,41 +18,58 @@ public final class ResultFactory {
         throw becauseAdaptersOnly();
     }
 
-    static Result<Void, Exception> evaluate(final Runnable source) {
+    public static <T, E extends Exception> Result<T, E> success(final T value) {
+        return new SimpleResult<>(value, null);
+    }
+
+    public static <T, E extends Exception> Result<T, E> failure(final E thrown) {
+        return new SimpleResult<>(null, thrown);
+    }
+
+    public static Result<Void, Exception> evaluate(final Runnable source) {
         try {
-            return new ForkResult<>((Void) null);
+            source.run();
+            return success(null);
         } catch (final Exception thrown) {
-            return new ForkResult<>(thrown);
+            return failure(thrown);
         }
     }
 
-    static <T> Result<T, Exception> evaluate(final Supplier<T> source) {
+    public static <E extends Exception> Result<Void, E> evaluateThrowing(final ThrowingRunnable<E> source) {
         try {
-            return new ForkResult<>(source.get());
+            source.run();
+            return success(null);
         } catch (final Exception thrown) {
-            return new ForkResult<>(thrown);
+            return failure((E) thrown); //TODO consider a checked sink
         }
     }
 
-    private static class ForkResult<T, E extends Exception> implements Result<T, E> {
-        final Fork<T, E> forked;
-
-        ForkResult(final T value) {
-            forked = forkOf(value, null);
+    public static <T> Result<T, Exception> evaluate(final Supplier<T> source) {
+        try {
+            return success(source.get());
+        } catch (final Exception thrown) {
+            return failure(thrown);
         }
+    }
 
-        ForkResult(final E exception) {
-            forked = forkOf(null, exception);
+    public static <T, E extends Exception> Result<T, E> evaluateThrowing(final ThrowingSupplier<T, E> source) {
+        try {
+            return success(source.get());
+        } catch (final Exception thrown) {
+            return failure((E) thrown);
         }
+    }
+
+    private record SimpleResult<T, E extends Exception>(T value, E thrown) implements Result<T, E> {
 
         @Override
         public T get() {
-            return forked.top();
+            return value;
         }
 
         @Override
         public E getException() {
-            return forked.bottom();
+            return thrown;
         }
     }
 }

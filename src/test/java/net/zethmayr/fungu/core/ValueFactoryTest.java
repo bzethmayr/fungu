@@ -6,9 +6,19 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static net.zethmayr.fungu.core.ValueFactory.values;
 import static net.zethmayr.fungu.test.TestConstants.EXPECTED;
+import static net.zethmayr.fungu.test.TestHelper.invokeDefaultConstructor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ValueFactoryTest {
+
+    @Test
+    void valueFactory_whenInstantiated_throwsInstead() {
+        assertThrows(UnsupportedOperationException.class, () ->
+
+                invokeDefaultConstructor(ValueFactory.class));
+    }
+
     @Test
     void values_givenNoSuppliers_returnsEmptyArray() {
 
