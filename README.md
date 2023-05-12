@@ -18,6 +18,7 @@ is probably compatible with them.
 * [exception sinks](/src/main/java/net/zethmayr/fungu/throwing/package-info.java)
 * [field interfaces](/src/main/java/net/zethmayr/fungu/fields/package-info.java)
 * [fluent visitor pattern](/src/main/java/net/zethmayr/fungu/UponHelper.java)
+* Punctiliously complete javadoc
 
 ### Smaller features
 * [close proxies](/src/main/java/net/zethmayr/fungu/CloseableFactory.java)
