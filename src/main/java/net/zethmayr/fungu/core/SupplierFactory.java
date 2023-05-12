@@ -14,6 +14,13 @@ public final class SupplierFactory {
     }
 
     /**
+     * Returns a supplier with a covariant null result.
+     */
+    public static <T> Supplier<T> nothing() {
+        return () -> null;
+    }
+
+    /**
      * Returns a supplier with a fixed value.
      *
      * @param value the value.

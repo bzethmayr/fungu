@@ -23,7 +23,7 @@ class ConsumerFactoryTest {
     @Test
     void nothing_givenValue_doesNothing() {
 
-        final Consumer<String> underTest = nothing();
+        final Consumer<String> underTest = nowhere();
         underTest.accept(EXPECTED);
 
         assertNotNull(underTest);

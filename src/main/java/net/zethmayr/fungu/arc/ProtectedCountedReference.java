@@ -3,7 +3,7 @@ package net.zethmayr.fungu.arc;
 import java.io.Closeable;
 
 import static net.zethmayr.fungu.CloseableFactory.closeIntercepted;
-import static net.zethmayr.fungu.ConsumerFactory.nothing;
+import static net.zethmayr.fungu.ConsumerFactory.nowhere;
 
 /**
  * This counted reference
@@ -28,7 +28,7 @@ public abstract class ProtectedCountedReference<T extends Closeable> extends Sim
      */
     protected ProtectedCountedReference(final Class<T> resourceInterface, final Class<?>... additionalInterfaces) {
         super();
-        closeProtected = closeIntercepted(resourceInterface, super.getResource(), nothing(), additionalInterfaces);
+        closeProtected = closeIntercepted(resourceInterface, super.getResource(), nowhere(), additionalInterfaces);
     }
 
     /**
