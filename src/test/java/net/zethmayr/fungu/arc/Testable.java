@@ -6,4 +6,3 @@ public interface Testable extends Closeable {
     boolean isClosed();
 
     int getValue();
-}
