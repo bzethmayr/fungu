@@ -90,13 +90,13 @@ public abstract class CountedReference<T> implements AutoCloseable {
         closeThrew.raise();
     }
 
-    @ReuseResults
     /**
      * Creates a new thread-local for static use by implementations.
      *
      * @param <T> the resource type.
      * @return a new, empty thread-local
      */
+    @ReuseResults
     public static <T extends Closeable> ThreadLocal<CountAndRef<T>> newLocalCount() {
         return new ThreadLocal<>();
     }
@@ -109,12 +109,12 @@ public abstract class CountedReference<T> implements AutoCloseable {
      */
     protected abstract ThreadLocal<CountAndRef<T>> countAndRef();
 
-    @ReuseResults
     /**
      * Creates the actual, real resource and returns the reference.
      *
      * @return the real resource
      */
+    @ReuseResults
     protected abstract T createResource();
 
     /**

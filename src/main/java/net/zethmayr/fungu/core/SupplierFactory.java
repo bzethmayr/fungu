@@ -20,6 +20,9 @@ public final class SupplierFactory {
 
     /**
      * Returns a supplier with a covariant null result.
+     *
+     * @param <T> the supplied type.
+     * @return a supplier.
      */
     @NotNull
     public static <T> Supplier<@Nullable T> nothing() {
@@ -30,8 +33,8 @@ public final class SupplierFactory {
      * Returns a supplier with a fixed value.
      *
      * @param value the value.
-     * @param <T>   the value type
-     * @return a supplier
+     * @param <T>   the value type.
+     * @return a supplier.
      */
     @NotNull
     public static <T> Supplier<T> from(final T value) {
