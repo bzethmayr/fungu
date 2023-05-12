@@ -1,4 +1,4 @@
-package net.zethmayr.fungu.arc;
+package net.zethmayr.fungu;
 
 import java.io.Closeable;
 

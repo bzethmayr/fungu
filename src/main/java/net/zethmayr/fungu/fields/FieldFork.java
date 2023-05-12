@@ -1,7 +1,6 @@
 package net.zethmayr.fungu.fields;
 
 import net.zethmayr.fungu.ReFork;
-import net.zethmayr.fungu.core.ExceptionFactory;
 
 import java.util.function.Supplier;
 
@@ -10,6 +9,7 @@ import static net.zethmayr.fungu.core.ExceptionFactory.becauseNotInstantiable;
 
 /**
  * A fork with explicit fields and field types.
+ *
  * @param <T> the top type
  * @param <B> the bottom type
  */
@@ -17,6 +17,7 @@ public interface FieldFork<T, B> extends ReFork<T, B>, HasX {
     /**
      * Returns the gettable field interface associated with
      * the bottom item.
+     *
      * @return the top item field type
      */
     Class<? extends HasX> topHas();
@@ -24,6 +25,7 @@ public interface FieldFork<T, B> extends ReFork<T, B>, HasX {
     /**
      * Returns the gettable field interface associated with
      * the bottom item.
+     *
      * @return the bottom item field type.
      */
     Class<? extends HasX> bottomHas();
@@ -54,9 +56,9 @@ public interface FieldFork<T, B> extends ReFork<T, B>, HasX {
      *
      * @param having     the having interface.
      * @param fieldClass the field type
+     * @param <H>        the field interface.
+     * @param <X>        the value type.
      * @return a getter, or throws.
-     * @param <H> the field interface.
-     * @param <X> the value type.
      */
     @Override
     default <H extends HasX, X> Supplier<X> getGetter(

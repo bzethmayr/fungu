@@ -1,5 +1,7 @@
 package net.zethmayr.fungu.arc;
 
+import net.zethmayr.fungu.Testable;
+
 import java.io.IOException;
 
 public interface TestsCountedReference<T extends Testable, U extends CountedReference<T>> {

@@ -1,5 +1,7 @@
 package net.zethmayr.fungu.arc;
 
+import net.zethmayr.fungu.TestResource;
+import net.zethmayr.fungu.Testable;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;

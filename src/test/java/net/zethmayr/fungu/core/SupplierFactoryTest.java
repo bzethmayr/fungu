@@ -1,6 +1,5 @@
 package net.zethmayr.fungu.core;
 
-import net.zethmayr.fungu.core.SupplierFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

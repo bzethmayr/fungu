@@ -14,15 +14,16 @@ public final class FieldForkFactory {
 
     /**
      * Creates a new field-aware fork with the given types and contents.
-     * @param topHas the top gettable field interface.
-     * @param topType the top value type.
-     * @param top the top value.
-     * @param bottomHas the bottom gettable field type.
+     *
+     * @param topHas     the top gettable field interface.
+     * @param topType    the top value type.
+     * @param top        the top value.
+     * @param bottomHas  the bottom gettable field type.
      * @param bottomType the bottom value type.
-     * @param bottom the bottom value.
+     * @param bottom     the bottom value.
+     * @param <T>        the top type.
+     * @param <B>        the bottom type.
      * @return a new field-aware fork.
-     * @param <T> the top type.
-     * @param <B> the bottom type.
      */
     public static <T, B> FieldFork<T, B> fieldForkOf(
             final Class<? extends HasX> topHas, final Class<T> topType, final T top,

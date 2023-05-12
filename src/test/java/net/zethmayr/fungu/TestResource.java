@@ -1,4 +1,4 @@
-package net.zethmayr.fungu.arc;
+package net.zethmayr.fungu;
 
 import java.io.Closeable;
 
@@ -8,7 +8,7 @@ import static net.zethmayr.fungu.test.TestConstants.TEST_RANDOM;
 /**
  * Models some general aspects of resources for test purposes.
  */
-class TestResource implements Testable, Closeable {
+public class TestResource implements Testable, Closeable {
 
     /**
      * A resource reference might refer to a closed and therefore invalid resource.

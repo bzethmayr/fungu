@@ -38,7 +38,6 @@ public final class PredicateFactory {
      * @param <T>        the tested type.
      * @return a new predicate requiring all the given predicates to pass.
      */
-
     @SafeVarargs
     public static <T> Predicate<T> allOf(final Predicate<? super T>... inclusions) {
         Predicate<T> requirement = genericDegenerate(ALWAYS);

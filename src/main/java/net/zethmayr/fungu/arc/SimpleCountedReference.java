@@ -1,5 +1,7 @@
 package net.zethmayr.fungu.arc;
 
+import net.zethmayr.fungu.capabilities.ReuseResults;
+
 import java.io.Closeable;
 import java.io.IOException;
 
@@ -46,6 +48,7 @@ public abstract class SimpleCountedReference<T extends Closeable> extends Counte
      *
      * @return the resource.
      */
+    @ReuseResults
     public T getResource() {
         return maybeRef()
                 .map(CountAndRef::getResource)
