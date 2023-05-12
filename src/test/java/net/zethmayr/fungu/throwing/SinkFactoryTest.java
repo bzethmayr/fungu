@@ -18,7 +18,7 @@ class SinkFactoryTest {
     @Test
     void sink_givenNothing_returnsSink_whenAcceptThenRaise_throwsAccepted() {
         final Exception thrown = new Exception();
-        final Sink underTest = sink();
+        final Sink<Exception> underTest = sink();
 
         assertInstanceOf(Sink.class, underTest);
         underTest.accept(thrown);
@@ -31,7 +31,7 @@ class SinkFactoryTest {
     void sink_givenNothing_returnsSink_whenAcceptTwiceBeforeRaise_throwsFirstSuppressingSecond() {
         final Exception firstThrown = new Exception();
         final Exception secondThrown = new Exception();
-        final Sink underTest = sink();
+        final Sink<Exception> underTest = sink();
 
         assertInstanceOf(Sink.class, underTest);
         underTest.accept(firstThrown);
@@ -45,7 +45,7 @@ class SinkFactoryTest {
     @Test
     void hole_givenNothing_returnsSink_whenAcceptThenRaise_doesNothing() throws Exception {
         final Exception thrown = new Exception();
-        final Sink underTest = hole();
+        final Sink<Exception> underTest = hole();
 
         assertInstanceOf(Sink.class, underTest);
         underTest.accept(thrown);
@@ -55,7 +55,7 @@ class SinkFactoryTest {
     @Test
     void mine_givenNothing_returnsSink_whenAccept_throwsWrapped() {
         final Exception thrown = new Exception();
-        final Sink underTest = mine();
+        final Sink<Exception> underTest = mine();
 
         assertInstanceOf(Sink.class, underTest);
         final RuntimeException caught = assertThrows(RuntimeException.class, () ->
@@ -67,7 +67,7 @@ class SinkFactoryTest {
     @Test
     void threadSafeSink_givenNothing_returnsSink_whenAcceptThenRaise_throwsAccepted() {
         final Exception thrown = new Exception();
-        final Sink underTest = threadSafeSink();
+        final Sink<Exception> underTest = threadSafeSink();
 
         assertInstanceOf(Sink.class, underTest);
         underTest.accept(thrown);

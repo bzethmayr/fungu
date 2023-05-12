@@ -32,7 +32,7 @@ public final class ConsumerFactory {
      * @param <T> the type done nothing with.
      * @return a consumer.
      */
-    public static <T> Consumer<T> nothing() {
+    public static <T> Consumer<T> nowhere() {
         return x -> {
         };
     }

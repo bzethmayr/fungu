@@ -1,14 +1,12 @@
 package net.zethmayr.fungu;
 
-import net.zethmayr.fungu.core.ExceptionFactory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
+
+import static net.zethmayr.fungu.core.ExceptionFactory.becauseStaticsOnly;
 
 /**
  * Provides functions in the family {@code coalesce},
@@ -19,7 +17,7 @@ import java.util.stream.Stream;
 public final class CoalescenceHelper {
 
     private CoalescenceHelper() {
-        throw ExceptionFactory.becauseStaticsOnly();
+        throw becauseStaticsOnly();
     }
 
     /**
@@ -32,10 +30,12 @@ public final class CoalescenceHelper {
     @Nullable
     @SafeVarargs
     public static <T> T coalesce(final @Nullable T... values) {
-        return Stream.of(values)
-                .filter(Objects::nonNull)
-                .findFirst()
-                .orElse(null);
+        for (final T candidate : values) {
+            if (candidate != null) {
+                return candidate;
+            }
+        }
+        return null;
     }
 
     /**
@@ -50,8 +50,8 @@ public final class CoalescenceHelper {
     @NotNull
     @SafeVarargs
     public static <T> T defaultUnless(@NotNull final T defaultValue, final @Nullable T... values) {
-        return Optional.ofNullable(coalesce(values))
-                .orElse(defaultValue);
+        final T coalesced = coalesce(values);
+        return coalesced == null ? defaultValue : coalesced;
     }
 
     /**
@@ -67,11 +67,15 @@ public final class CoalescenceHelper {
     @NotNull
     @SafeVarargs
     public static <T> Supplier<@Nullable T> coalesces(final Supplier<@Nullable T>... sources) {
-        return () -> Stream.of(sources)
-                .map(Supplier::get)
-                .filter(Objects::nonNull)
-                .findFirst()
-                .orElse(null);
+        return () -> {
+            for (final Supplier<T> candidate : sources) {
+                final T result = candidate.get();
+                if (result != null) {
+                    return result;
+                }
+            }
+            return null;
+        };
     }
 
     /**
@@ -141,11 +145,15 @@ public final class CoalescenceHelper {
     public static <T, R> Function<T, @Nullable R> coalescing(
             final Function<@NotNull T, @Nullable R>... accesses
     ) {
-        return t -> Stream.of(accesses)
-                .map(f -> f.apply(t))
-                .filter(Objects::nonNull)
-                .findFirst()
-                .orElse(null);
+        return t -> {
+            for (final Function<T, R> access : accesses) {
+                final R result = access.apply(t);
+                if (result != null) {
+                    return result;
+                }
+            }
+            return null;
+        };
     }
 
     /**
