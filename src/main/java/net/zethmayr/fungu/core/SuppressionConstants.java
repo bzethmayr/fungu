@@ -2,6 +2,9 @@ package net.zethmayr.fungu.core;
 
 import static net.zethmayr.fungu.core.SuppressionConstants.LiteralValues.UNCHECKED;
 
+/**
+ * Defines constants used to document uses of {@link SuppressWarnings}.
+ */
 public class SuppressionConstants {
 
     private SuppressionConstants() {
@@ -26,4 +29,10 @@ public class SuppressionConstants {
      * This cast will always succeed, the check is irrelevant.
      */
     public static final String CHECK_ASSURED = UNCHECKED;
+
+    /**
+     * This cast is only assured by local convention -
+     * this code should be private.
+     */
+    public static final String LOCAL_CONVENTION = UNCHECKED;
 }

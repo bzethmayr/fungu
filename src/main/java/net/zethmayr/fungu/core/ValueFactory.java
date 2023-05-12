@@ -1,18 +1,34 @@
 package net.zethmayr.fungu.core;
 
-import net.zethmayr.fungu.core.ExceptionFactory;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import static net.zethmayr.fungu.core.ExceptionFactory.becauseFactory;
+
+/**
+ * Provides adapters down to values.
+ */
 public final class ValueFactory {
     private ValueFactory() {
-        throw ExceptionFactory.becauseFactory();
+        throw becauseFactory();
     }
 
-    public static Object[] values(final Supplier<?>... suppliers) {
-        return Stream.of(suppliers)
-                .map(Supplier::get)
-                .toArray();
+    /**
+     * Returns the values returned by the suppliers passed.
+     *
+     * @param suppliers some value suppliers.
+     * @return some values.
+     */
+    @NotNull
+    public static Object[] values(@NotNull final Supplier<?>... suppliers) {
+        final int length = suppliers.length;
+        final Object[] results = new Object[length];
+        for (int index = 0; index < length; index++) {
+            results[index] = suppliers[index].get();
+        }
+        return results;
     }
 }

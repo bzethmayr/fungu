@@ -1,13 +1,17 @@
 package net.zethmayr.fungu.arc;
 
+import net.zethmayr.fungu.TestResource;
+import net.zethmayr.fungu.Testable;
 import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
 
 import static net.zethmayr.fungu.core.ExceptionFactory.becauseImpossible;
 import static org.junit.jupiter.api.Assertions.*;
 
-class SafeCountedReferenceTest {
+class ProtectedCountedReferenceTest implements TestsCountedReference<Testable, ProtectedCountedReference<Testable>> {
 
-    private static class TestCountedReference extends SafeCountedReference<Testable> {
+    private static class TestCountedReference extends ProtectedCountedReference<Testable> {
 
         public TestCountedReference() {
             super(Testable.class);
@@ -36,15 +40,21 @@ class SafeCountedReferenceTest {
         }
     }
 
+    @Override
+    public TestCountedReference newReference() {
+        return new TestCountedReference();
+    }
+
     @Test
-    void countedReference_whenOpenedAndClosed_closesResourceOnce() throws Exception {
+    @Override
+    public void countedReference_whenOpenedAndClosed_closesResourceOnce() throws IOException {
         /*
          * Disclaimer - it is generally inadvisable to
          * leak the resource reference from within a try-with-resources.
          */
         Testable resource;
 
-        try (final TestCountedReference handle = new TestCountedReference()) {
+        try (final TestCountedReference handle = newReference()) {
             resource = handle.getResource();
             assertFalse(resource.isClosed());
         }
@@ -53,17 +63,18 @@ class SafeCountedReferenceTest {
     }
 
     @Test
-    void countedReference_whenOpenedTwiceAndClosedTwice_closesOneResourceOnce() throws Exception {
+    @Override
+    public void countedReference_whenOpenedTwiceAndClosedTwice_closesOneResourceOnce() throws IOException {
         /*
          * Disclaimer - it is generally inadvisable to
          * leak the resource reference from within a try-with-resources.
          */
         Testable resource;
 
-        try (final TestCountedReference outer = new TestCountedReference()) {
+        try (final TestCountedReference outer = newReference()) {
             resource = outer.getResource();
             final int outerValue = resource.getValue();
-            try (final TestCountedReference inner = new TestCountedReference()) {
+            try (final TestCountedReference inner = newReference()) {
 
                 final Testable innerResource = inner.getResource();
                 assertEquals(outerValue, innerResource.getValue());
@@ -74,7 +85,7 @@ class SafeCountedReferenceTest {
     }
 
     @Test
-    void countedReference_whenResourceIsClosed_closeIsSuppressedAndClosesAtEnd() throws Exception {
+    public void countedReference_whenResourceIsClosed_closeIsSuppressedAndClosesAtEnd() throws IOException {
         Testable resource;
 
         try (final TestCountedReference underTest = new TestCountedReference()) {

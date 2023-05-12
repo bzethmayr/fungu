@@ -8,6 +8,8 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import static net.zethmayr.fungu.core.ExceptionFactory.becauseUnsupported;
+
 /**
  * Meta-interface for interfaces defining field getters.
  * Provides access to the getter method(s).
@@ -58,9 +60,9 @@ public interface HasX {
 
     /**
      * Returns the function that
-     * accesses the interface field.
+     * accesses the given interface field.
      *
-     * @param declaring the having interface
+     * @param declaring the gettable field interface
      * @param fieldType the field type
      * @param <H>       the having interface
      * @param <T>       the field type
@@ -72,6 +74,12 @@ public interface HasX {
         return GetterWiring.INSTANCE.getGetFunction(declaring);
     }
 
+    /**
+     * Returns the type-erased function that
+     * accesses the given interface field.
+     * @param declaring the gettable field interface.
+     * @return the field accessor function.
+     */
     static Function<?, ?> getGetFunction(
             final Class<? extends HasX> declaring
     ) {
@@ -82,12 +90,15 @@ public interface HasX {
      * Registry of field value interfaces and getters.
      */
     enum GetterWiring {
+        /**
+         * The sole getter registrar.
+         */
         INSTANCE;
         /**
          * Since the number of independently significant fields is finite tending towards small,
          * this permanent map does not create a memory leak.
          */
-        final ConcurrentMap<Class<? extends HasX>, Function<? extends HasX, ?>> getters =
+        private final ConcurrentMap<Class<? extends HasX>, Function<? extends HasX, ?>> getters =
                 new ConcurrentHashMap<>();
 
         /**
@@ -114,7 +125,7 @@ public interface HasX {
          */
         <H extends HasX, T> Function<H, T> getGetFunction(final Class<H> declaring) {
             return Optional.ofNullable((Function<H, T>) getters.get(declaring))
-                    .orElseThrow(ExceptionFactory.unsupportedBecause("no getter for %s in %s", declaring, getters));
+                    .orElseThrow(() -> becauseUnsupported("no getter for %s in %s", declaring, getters));
         }
     }
 }

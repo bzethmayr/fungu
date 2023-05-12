@@ -1,8 +1,7 @@
 package net.zethmayr.fungu.hypothetical;
 
-import net.zethmayr.fungu.core.SuppressionConstants;
 import net.zethmayr.fungu.core.ExceptionFactory;
-import net.zethmayr.fungu.core.SupplierFactory;
+import net.zethmayr.fungu.core.SuppressionConstants;
 
 import java.util.Arrays;
 import java.util.NoSuchElementException;
@@ -12,30 +11,90 @@ import java.util.stream.Stream;
 
 import static java.lang.System.arraycopy;
 import static java.util.Objects.nonNull;
+import static net.zethmayr.fungu.core.ExceptionFactory.becauseFactory;
+import static net.zethmayr.fungu.core.ExceptionFactory.becauseNonexistent;
 
+/**
+ * Superinterface of strongly-typed classes which also have finite, arbitrary n-tuple field semantics.
+ */
 public interface Nuple {
 
+    /**
+     * Returns the number of addressable fields.
+     *
+     * @return the number of fields.
+     */
     int arity();
 
-    default int inRange(final int index) {
+    /**
+     * Returns the same index passed,
+     * if in range,
+     * or throws an exception.
+     *
+     * @param index an index being evaluated
+     * @return the same index, or throws
+     */
+    default int requireInRange(final int index) {
         return Optional.of(index)
                 .filter(n -> n < arity())
                 .filter(n -> n > -1)
-                .orElseThrow(ExceptionFactory.illegalBecause("no member %s", SupplierFactory.from(index)));
+                .orElseThrow(() -> becauseNoMember(index));
     }
 
+    /**
+     * Returns the erased class of the item at the given index.
+     *
+     * @param index an index.
+     * @return an item class.
+     */
     Class<?> nthRawType(final int index);
 
+    /**
+     * Returns the generic class of the item at the given index,
+     * as compatible with the expected class.
+     *
+     * @param index        an index.
+     * @param expectedType the expected class.
+     * @param <T>          the item type.
+     * @return an item class.
+     */
     <T> Class<T> nthType(final int index, final Class<T> expectedType);
 
+    /**
+     * Returns the generic item at the given index,
+     * as compatible with the expected class.
+     *
+     * @param index        an index.
+     * @param expectedType the expected class.
+     * @param <T>          the item type.
+     * @return an item.
+     */
     <T> T nthMember(final int index, final Class<T> expectedType);
 
+    /**
+     * Returns the type-erased item at the given index.
+     *
+     * @param index an index.
+     * @return an item.
+     */
     Object nthRawMember(final int index);
 
+    /**
+     * Returns a new nuple with the given value and inferred types.
+     *
+     * @param values the values.
+     * @return a new arbitrary nuple.
+     */
     static Nuple nupleOfValues(final Object... values) {
         return new NupleFactory.ArrayNuple(values);
     }
 
+    /**
+     * Guesses expected classes for the given values.
+     *
+     * @param values some values.
+     * @return some classes.
+     */
     static Class<?>[] inferredTypes(final Object... values) {
         return Stream.of(values)
                 .map(v -> nonNull(v)
@@ -45,18 +104,34 @@ public interface Nuple {
                 .toArray(Class[]::new);
     }
 
+    /**
+     * Returns an exception indicating the index is out of range.
+     *
+     * @param index an index.
+     * @return an exception.
+     */
     static NoSuchElementException becauseNoMember(final int index) {
-        return ExceptionFactory.becauseNonexistent("no member %s", index);
+        return becauseNonexistent("no member %s", index);
     }
 
+    /**
+     * Returns a new arbitrary nuple.
+     *
+     * @param values the values.
+     * @param types  the types.
+     * @return a new nuple.
+     */
     static Nuple nupleOfTypedValues(final Object[] values, final Class<?>... types) {
         return new NupleFactory.ArrayNuple(values, types);
     }
 
+    /**
+     * Factory for arbitrary vs typed nuple values.
+     */
     final class NupleFactory {
 
         private NupleFactory() {
-            throw ExceptionFactory.becauseFactory();
+            throw becauseFactory();
         }
 
         private record ArrayNuple(Object[] contents, Class<?>... types) implements Nuple {
@@ -67,7 +142,7 @@ public interface Nuple {
             }
 
             public Class<?> nthRawType(final int index) {
-                return types[inRange(index)];
+                return types[requireInRange(index)];
             }
 
             @Override
@@ -88,7 +163,7 @@ public interface Nuple {
 
             @Override
             public Object nthRawMember(int index) {
-                return contents[inRange(index)];
+                return contents[requireInRange(index)];
             }
 
             private ArrayNuple(Object[] contents, Class<?>... types) {

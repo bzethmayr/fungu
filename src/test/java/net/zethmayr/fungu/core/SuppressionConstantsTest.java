@@ -1,6 +1,5 @@
 package net.zethmayr.fungu.core;
 
-import net.zethmayr.fungu.core.SuppressionConstants;
 import org.junit.jupiter.api.Test;
 
 import static net.zethmayr.fungu.test.TestHelper.invokeDefaultConstructor;

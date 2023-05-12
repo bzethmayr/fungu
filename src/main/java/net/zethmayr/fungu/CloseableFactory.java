@@ -3,6 +3,7 @@ package net.zethmayr.fungu;
 import net.zethmayr.fungu.throwing.ThrowingConsumer;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.lang.reflect.Proxy;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -49,9 +50,12 @@ public final class CloseableFactory {
      * @return a similar instance with close redirected.
      */
     public static <T extends Closeable, R extends T> T closeIntercepted(
-            Class<T> resourceInterface, final R closeable, final Consumer<R> interceptor, final Class<?>... additionalInterfaces
+            Class<T> resourceInterface,
+            final R closeable,
+            final Consumer<R> interceptor,
+            final Class<?>... additionalInterfaces
     ) {
-        return closeIntercepted(resourceInterface, closeable, (ThrowingConsumer<R>) interceptor::accept, additionalInterfaces);
+        return closeIntercepted(resourceInterface, closeable, (ThrowingConsumer<R, IOException>) interceptor::accept, additionalInterfaces);
     }
 
     /**
@@ -68,7 +72,9 @@ public final class CloseableFactory {
      * @return a similar instance with close redirected.
      */
     public static <T extends Closeable, R extends T> T closeIntercepted(
-            Class<T> resourceInterface, final R closeable, final ThrowingConsumer<R> interceptsClose, final Class<?>... additionalInterfaces
+            Class<T> resourceInterface, final R closeable,
+            final ThrowingConsumer<R, IOException> interceptsClose,
+            final Class<?>... additionalInterfaces
     ) {
         if (!resourceInterface.isInterface()) {
             throw becauseIllegal("%s is not an interface", resourceInterface);
@@ -86,7 +92,7 @@ public final class CloseableFactory {
                         .toArray(Class[]::new),
                 (p, m, a) ->
                         m.getName().equals("close")
-                                ? throwingUpon(null, (ThrowingConsumer<T>) x -> interceptsClose.accept(closeable))
+                                ? throwingUpon(null, (ThrowingConsumer<T, IOException>) x -> interceptsClose.accept(closeable))
                                 : m.invoke(closeable, a)
         ));
     }

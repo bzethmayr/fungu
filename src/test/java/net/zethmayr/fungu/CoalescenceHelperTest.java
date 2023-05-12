@@ -9,10 +9,17 @@ import static java.util.function.Function.identity;
 import static net.zethmayr.fungu.CoalescenceHelper.*;
 import static net.zethmayr.fungu.core.SupplierFactory.from;
 import static net.zethmayr.fungu.test.TestConstants.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static net.zethmayr.fungu.test.TestHelper.invokeDefaultConstructor;
+import static org.junit.jupiter.api.Assertions.*;
 
 class CoalescenceHelperTest {
+
+    @Test
+    void coalescenceHelper_whenInstantiated_throwsInstead() {
+        assertThrows(UnsupportedOperationException.class, () ->
+
+                invokeDefaultConstructor(CoalescenceHelper.class));
+    }
 
     @Test
     void coalesce_givenNull_returnsNull() {

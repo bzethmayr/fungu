@@ -4,6 +4,7 @@ import net.zethmayr.fungu.throwing.ThrowingConsumer;
 import org.junit.jupiter.api.Test;
 
 import java.io.Closeable;
+import java.io.IOException;
 
 import static net.zethmayr.fungu.CloseableFactory.closeIntercepted;
 import static net.zethmayr.fungu.CloseableFactory.closeable;
@@ -44,36 +45,7 @@ public class CloseableFactoryTest {
 
     @Test
     void closeIntercepted_givenCloseableAndInterfaces_returnsInterceptedWithInterfaces() throws Exception {
-        interface Testable extends Closeable {
-            int getValue();
-
-            boolean isClosed();
-        }
-        class TestResource implements Testable, Closeable {
-            private final int value = TEST_RANDOM.nextInt();
-            private boolean closed;
-
-            @Override
-            public int getValue() {
-                if (closed) {
-                    throw becauseImpossible("Already closed, but value was %s", value);
-                }
-                return value;
-            }
-
-            @Override
-            public void close() {
-                if (closed) {
-                    throw becauseImpossible("Already closed");
-                }
-                closed = true;
-            }
-
-            public boolean isClosed() {
-                return closed;
-            }
-        }
-        final ThrowingConsumer<TestResource> interceptor = r -> {
+        final ThrowingConsumer<TestResource, IOException> interceptor = r -> {
         };
 
         final TestResource realResource = new TestResource();
