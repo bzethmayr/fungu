@@ -8,9 +8,17 @@ import java.util.function.Function;
 import static net.zethmayr.fungu.DecisionHelper.*;
 import static net.zethmayr.fungu.core.SupplierFactory.from;
 import static net.zethmayr.fungu.test.TestConstants.*;
+import static net.zethmayr.fungu.test.TestHelper.invokeDefaultConstructor;
 import static org.junit.jupiter.api.Assertions.*;
 
 class DecisionHelperTest {
+
+    @Test
+    void decisionHelper_whenInstantiated_throwsInstead() {
+        assertThrows(UnsupportedOperationException.class, () ->
+
+                invokeDefaultConstructor(DecisionHelper.class));
+    }
 
     @Test
     void anyNull_whenNone_returnsFalse() {

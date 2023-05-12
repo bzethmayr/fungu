@@ -1,5 +1,6 @@
 package net.zethmayr.fungu.arc;
 
+import net.zethmayr.fungu.capabilities.ReuseResults;
 import net.zethmayr.fungu.throwing.Sink;
 import net.zethmayr.fungu.throwing.ThrowingConsumer;
 
@@ -95,6 +96,7 @@ public abstract class CountedReference<T> implements AutoCloseable {
      * @param <T> the resource type.
      * @return a new, empty thread-local
      */
+    @ReuseResults
     public static <T extends Closeable> ThreadLocal<CountAndRef<T>> newLocalCount() {
         return new ThreadLocal<>();
     }
@@ -112,6 +114,7 @@ public abstract class CountedReference<T> implements AutoCloseable {
      *
      * @return the real resource
      */
+    @ReuseResults
     protected abstract T createResource();
 
     /**

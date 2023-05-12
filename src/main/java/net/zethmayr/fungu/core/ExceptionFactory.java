@@ -1,5 +1,7 @@
 package net.zethmayr.fungu.core;
 
+import net.zethmayr.fungu.capabilities.ReuseResults;
+import net.zethmayr.fungu.capabilities.SingleUse;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -69,6 +71,7 @@ public final class ExceptionFactory {
      * @return an unchecked exception.
      */
     @NotNull
+    @SingleUse
     public static IllegalArgumentException becauseIllegal(
             @NotNull final String argumentConstraint, final Object... illegalValues
     ) {
@@ -86,6 +89,7 @@ public final class ExceptionFactory {
      * @return an unchecked exception
      */
     @NotNull
+    @SingleUse
     public static IllegalArgumentException becauseThrewBecauseIllegal(
             @NotNull final String argumentConstraint, @NotNull final Exception thrown, final Object... illegalValues
     ) {
@@ -101,6 +105,7 @@ public final class ExceptionFactory {
      * @return an unchecked exception
      */
     @NotNull
+    @SingleUse
     public static IllegalStateException becauseImpossible(
             @NotNull final String stateConstraint, final Object... violations
     ) {
@@ -118,6 +123,7 @@ public final class ExceptionFactory {
      * @return an unchecked exception
      */
     @NotNull
+    @SingleUse
     public static IllegalStateException becauseThrewImpossibly(
             @NotNull final String argumentConstraint, @NotNull final Exception thrown, final Object... supports
     ) {
@@ -134,6 +140,7 @@ public final class ExceptionFactory {
      */
     @NotNull
     @SafeVarargs
+    @ReuseResults
     public static Supplier<IllegalArgumentException> illegalBecause(
             @NotNull final String argumentConstraint, final Supplier<Object>... valueSuppliers
     ) {
@@ -150,6 +157,7 @@ public final class ExceptionFactory {
      * @return an unchecked exception
      */
     @NotNull
+    @SingleUse
     public static NoSuchElementException becauseNonexistent(
             @NotNull final String keyConstraint, @NotNull final Object... keys
     ) {
@@ -167,6 +175,7 @@ public final class ExceptionFactory {
      */
     @NotNull
     @SafeVarargs
+    @ReuseResults
     public static Supplier<NoSuchElementException> nonexistentBecause(
             @NotNull final String keyConstraint, final Supplier<Object>... keySuppliers
     ) {
@@ -181,6 +190,7 @@ public final class ExceptionFactory {
      * @return an unchecked exception.
      */
     @NotNull
+    @SingleUse
     public static IllegalArgumentException becauseNotUnique(@Nullable final Object repeatedKey) {
         return becauseIllegal(UNIQUENESS_CONSTRAINT_F, repeatedKey);
     }
@@ -192,7 +202,9 @@ public final class ExceptionFactory {
      * @param keySupplier the repeated key supplier
      * @return an unchecked exception supplier.
      */
-    public static Supplier<IllegalArgumentException> notUniqueBecause(@NotNull final Supplier<Object> keySupplier) {
+    @NotNull
+    @ReuseResults
+    public static Supplier<@NotNull IllegalArgumentException> notUniqueBecause(@NotNull final Supplier<Object> keySupplier) {
         return illegalBecause(UNIQUENESS_CONSTRAINT_F, keySupplier);
     }
 
@@ -207,6 +219,7 @@ public final class ExceptionFactory {
      * @return an unchecked exception
      */
     @NotNull
+    @SingleUse
     public static <T> IllegalArgumentException becauseConflicting(final Object scope, final T prior, final T proposed) {
         return becauseIllegal(CONFLICT_F, scope, prior, proposed);
     }
@@ -221,7 +234,9 @@ public final class ExceptionFactory {
      * @param <T>              the common value type.
      * @return an unchecked exception supplier.
      */
-    public static <T> Supplier<IllegalArgumentException> conflictingBecause(
+    @NotNull
+    @ReuseResults
+    public static <T> Supplier<@NotNull IllegalArgumentException> conflictingBecause(
             final Supplier<Object> scope, final Supplier<T> suppliesPrior, final Supplier<T> suppliesProposed
     ) {
         return illegalBecause(CONFLICT_F, scope, like(suppliesPrior), like(suppliesProposed));
@@ -242,6 +257,8 @@ public final class ExceptionFactory {
      * @param reasons any format string values.
      * @return an unchecked exception.
      */
+    @NotNull
+    @SingleUse
     public static UnsupportedOperationException becauseUnsupported(@NotNull final String format, final Object... reasons) {
         return new UnsupportedOperationException(format(format, reasons));
     }
@@ -254,7 +271,12 @@ public final class ExceptionFactory {
      * @param reasons any format string value suppliers.
      * @return an unchecked exception supplier.
      */
-    public static Supplier<UnsupportedOperationException> unsupportedBecause(@NotNull final String format, final Supplier<Object>... reasons) {
+    @SafeVarargs
+    @NotNull
+    @ReuseResults
+    public static Supplier<@NotNull UnsupportedOperationException> unsupportedBecause(
+            @NotNull final String format, final Supplier<Object>... reasons
+    ) {
         return () -> becauseUnsupported(format, values(reasons));
     }
 
@@ -264,6 +286,8 @@ public final class ExceptionFactory {
      *
      * @return an unchecked exception.
      */
+    @NotNull
+    @SingleUse
     public static UnsupportedOperationException becauseNotInstantiable() {
         return becauseUnsupported(NOT_INSTANTIABLE);
     }
@@ -275,6 +299,8 @@ public final class ExceptionFactory {
      *
      * @return an unchecked exception.
      */
+    @NotNull
+    @SingleUse
     public static UnsupportedOperationException becauseStaticsOnly() {
 
         return becauseUnsupported(STATICS_ONLY);
@@ -287,6 +313,8 @@ public final class ExceptionFactory {
      *
      * @return an unchecked exception.
      */
+    @NotNull
+    @SingleUse
     public static UnsupportedOperationException becauseConstantsOnly() {
         return becauseUnsupported(CONSTANTS_ONLY);
     }
@@ -298,6 +326,8 @@ public final class ExceptionFactory {
      *
      * @return an unchecked exception.
      */
+    @NotNull
+    @SingleUse
     public static UnsupportedOperationException becauseAdaptersOnly() {
         return becauseUnsupported(ADAPTERS_ONLY);
     }
@@ -309,6 +339,8 @@ public final class ExceptionFactory {
      *
      * @return an unchecked exception.
      */
+    @NotNull
+    @SingleUse
     public static UnsupportedOperationException becauseFactory() {
         return becauseUnsupported(FACTORY_METHODS_ONLY);
     }

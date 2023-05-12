@@ -1,5 +1,6 @@
 package net.zethmayr.fungu.arc;
 
+import net.zethmayr.fungu.capabilities.SingleUse;
 import net.zethmayr.fungu.throwing.ThrowingConsumer;
 
 import java.io.Closeable;
@@ -92,6 +93,7 @@ public abstract class TransparentCountedReference<R extends Closeable> extends S
      * @param <R> the resource type.
      * @param <T> the transparent counted reference type.
      */
+    @SingleUse
     public static <R extends Closeable, T extends TransparentCountedReference<R>> R openTransparent(
             final Supplier<T> opensCountedReference
     ) {

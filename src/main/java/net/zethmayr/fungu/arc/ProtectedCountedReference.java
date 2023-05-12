@@ -1,5 +1,7 @@
 package net.zethmayr.fungu.arc;
 
+import net.zethmayr.fungu.capabilities.ReuseResults;
+
 import java.io.Closeable;
 
 import static net.zethmayr.fungu.CloseableFactory.closeIntercepted;
@@ -39,6 +41,7 @@ public abstract class ProtectedCountedReference<T extends Closeable> extends Sim
      *
      * @return the open resource.
      */
+    @ReuseResults
     @Override
     public T getResource() {
         return closeProtected;

@@ -3,12 +3,11 @@ package net.zethmayr.fungu;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
+import static java.util.Objects.isNull;
 import static net.zethmayr.fungu.core.ExceptionFactory.becauseStaticsOnly;
 import static net.zethmayr.fungu.core.SupplierFactory.nothing;
 
@@ -27,8 +26,12 @@ public final class DecisionHelper {
      * @return true if any value is null, otherwise false.
      */
     public static boolean anyNull(final Object... values) {
-        return Stream.of(values)
-                .anyMatch(Objects::isNull);
+        for (final Object value : values) {
+            if (isNull(value)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -48,7 +51,6 @@ public final class DecisionHelper {
             @NotNull final Predicate<T> test, @NotNull final Supplier<R> supplier, @NotNull final Supplier<R> whenFalse
     ) {
         return t -> test.test(t) ? supplier.get() : whenFalse.get();
-
     }
 
     /**
@@ -123,7 +125,6 @@ public final class DecisionHelper {
             @NotNull final Predicate<T> test, @Nullable final R result, @NotNull final Supplier<R> whenNull
     ) {
         return t -> test.test(t) ? result : whenNull.get();
-
     }
 
     /**

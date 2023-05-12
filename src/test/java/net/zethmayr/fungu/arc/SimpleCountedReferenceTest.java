@@ -1,13 +1,11 @@
 package net.zethmayr.fungu.arc;
 
-import net.zethmayr.fungu.core.ExceptionFactory;
+import net.zethmayr.fungu.TestResource;
 import org.junit.jupiter.api.Test;
 
-import java.io.Closeable;
 import java.io.IOException;
 
 import static net.zethmayr.fungu.core.ExceptionFactory.becauseImpossible;
-import static net.zethmayr.fungu.test.TestConstants.TEST_RANDOM;
 import static org.junit.jupiter.api.Assertions.*;
 
 class SimpleCountedReferenceTest implements TestsCountedReference<TestResource, SimpleCountedReference<TestResource>> {

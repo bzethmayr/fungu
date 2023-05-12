@@ -1,9 +1,10 @@
 package net.zethmayr.fungu;
 
-import net.zethmayr.fungu.core.ExceptionFactory;
 import net.zethmayr.fungu.throwing.ThrowingConsumer;
 
 import java.util.function.Consumer;
+
+import static net.zethmayr.fungu.core.ExceptionFactory.becauseStaticsOnly;
 
 /**
  * Provides methods that implement the visitor pattern.
@@ -11,7 +12,7 @@ import java.util.function.Consumer;
 public final class UponHelper {
 
     private UponHelper() {
-        throw ExceptionFactory.becauseStaticsOnly();
+        throw becauseStaticsOnly();
     }
 
     /**
