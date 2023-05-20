@@ -1,9 +1,38 @@
 package net.zethmayr.fungu;
 
-record TypedFork<T, B>(Class<T> topType, T top, Class<B> bottomType, B bottom) implements ReFork<T, B> {
+import static net.zethmayr.fungu.core.ExceptionFactory.becauseIllegal;
 
+/**
+ * A tuple with explicit type information for its top and bottom values.
+ *
+ * @param <T> the top type.
+ * @param <B> the bottom type.
+ */
+public interface TypedFork<T, B> extends Fork<T, B> {
+
+    /**
+     * The top type per construction.
+     *
+     * @return the top type.
+     */
+    Class<T> topType();
+
+    /**
+     * The bottom type per construction.
+     *
+     * @return the bottom type.
+     */
+    Class<B> bottomType();
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public TypedFork<T, B> with(final T top, final B bottom) {
-        return new TypedFork<>(topType, top, bottomType, bottom);
+    default Class<?> nthRawType(final int zeroOrOne) {
+        return switch (zeroOrOne) {
+            case 0 -> topType();
+            case 1 -> bottomType();
+            default -> throw becauseIllegal(NUPLE_INDEX_ERR_F, zeroOrOne);
+        };
     }
 }

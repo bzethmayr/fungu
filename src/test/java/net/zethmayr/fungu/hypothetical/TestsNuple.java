@@ -11,76 +11,85 @@ public interface TestsNuple {
      */
     Nuple underTest();
 
-    default String zerostString() {
+    default String firstString() {
         return underTest().nthMember(0, String.class);
     }
 
     /**
-     * @see #zerostString()
+     * @see #firstString()
      */
     @Test
-    void nthMember_whenPopulatedAndExpectedType_givenZero_returnsFirstValue();
+    void nthMember_whenPopulatedAndExpectedType_givenFirstIndex_returnsFirstValue();
 
     /**
-     * @see #zerostString()
+     * @see #firstString()
      */
     @Test
-    void nthMember_whenPopulatedButNotExpectedType_givenZero_returnsFirstNull();
+    void nthMember_whenPopulatedButNotExpectedType_givenFirstIndex_returnsFirstNull();
+    
+    @Test
+    void nthMember_whenNoSuchIndex_throws();
 
-
-    default String onendString() {
+    /**
+     * Implementations with other than 2 members can override this.
+     * @return the last String, if any.
+     */
+    default String lastString() {
         return underTest().nthMember(1, String.class);
     }
 
-    default Class<String> zerostType() {
+    default Class<String> firstType() {
         return underTest().nthType(0, String.class);
     }
 
     /**
-     * @see #onendString()
+     * @see #lastString()
      */
     @Test
-    void nthMember_whenPopulatedAndExpectedType_givenOne_returnsSecondValue();
+    void nthMember_whenPopulatedAndExpectedType_givenLastIndex_returnsLastValue();
 
     /**
-     * @see #onendString()
+     * @see #lastString()
      */
     @Test
-    void nthMember_whenPopulatedButNotExpectedType_givenOne_returnsSecondNull();
+    void nthMember_whenPopulatedButNotExpectedType_givenLastIndex_returnsLastNull();
 
     /**
-     * @see #zerostString()
+     * @see #firstString()
      */
     @Test
-    void nthMember_whenAbsent_givenZero_returnsFirstNull();
+    void nthMember_whenAbsent_givenFirstIndex_returnsFirstNull();
 
     /**
-     * @see #onendString()
+     * @see #lastString()
      */
     @Test
-    void nthMember_whenAbsent_givenOne_returnsSecondNull();
+    void nthMember_whenAbsent_givenLastIndex_returnsLastNull();
 
     /**
-     * @see #zerostType()
+     * @see #firstType()
      */
     @Test
-    void nthType_whenPopulatedAndExpected_givenZero_returnsFirstType();
+    void nthType_whenPopulatedAndExpected_givenFirstIndex_returnsFirstType();
 
     /**
-     * @see #zerostType()
+     * @see #firstType()
      */
     @Test
-    void nthType_whenPopulatedAndUnexpected_givenZero_returnsNull();
+    void nthType_whenPopulatedAndUnexpected_givenFirstIndex_returnsNull();
+    
+    @Test
+    void nthType_whenNoSuchIndex_throws();
 
     /**
      * This is a minimum requirement -
      * reifiable implementations can
      * validly return a known type.
      *
-     * @see #zerostType()
+     * @see #firstType()
      */
     @Test
-    void nthType_whenAbsent_givenZero_returnsNull();
+    void nthType_whenAbsent_givenFirstIndex_returnsNull();
 
     /**
      * This is a minimum requirement -
@@ -88,5 +97,5 @@ public interface TestsNuple {
      * validly return a known type.
      */
     @Test
-    void nthType_whenAbsent_givenOne_returnsNull();
+    void nthType_whenAbsent_givenLastIndex_returnsNull();
 }

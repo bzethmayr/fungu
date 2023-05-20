@@ -52,10 +52,10 @@ public final class ForkFactory {
      * @param <B>        the bottom type.
      * @return a new type-aware fork.
      */
-    public static <T, B> ReFork<T, B> reForkOf(
+    public static <T, B> TypedFork<T, B> reForkOf(
             @NotNull final Class<T> topType, final T top, @NotNull final Class<B> bottomType, final B bottom
     ) {
-        return new TypedFork<>(topType, top, bottomType, bottom);
+        return new SimpleTypedFork<>(topType, top, bottomType, bottom);
     }
 
     /**
@@ -68,7 +68,7 @@ public final class ForkFactory {
      * @param <B>    the bottom type.
      * @return a new type-aware fork.
      */
-    public static <T, B> ReFork<T, B> reForkOf(@NotNull final T top, @NotNull final B bottom) {
+    public static <T, B> TypedFork<T, B> reForkOf(@NotNull final T top, @NotNull final B bottom) {
         return reForkOf((Class<T>) top.getClass(), top, (Class<B>) bottom.getClass(), bottom);
     }
 

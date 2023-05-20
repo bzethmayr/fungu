@@ -11,8 +11,7 @@ import java.util.stream.Stream;
 
 import static java.lang.System.arraycopy;
 import static java.util.Objects.nonNull;
-import static net.zethmayr.fungu.core.ExceptionFactory.becauseFactory;
-import static net.zethmayr.fungu.core.ExceptionFactory.becauseNonexistent;
+import static net.zethmayr.fungu.core.ExceptionFactory.*;
 
 /**
  * Superinterface of strongly-typed classes which also have finite, arbitrary n-tuple field semantics.
@@ -33,6 +32,7 @@ public interface Nuple {
      *
      * @param index an index being evaluated
      * @return the same index, or throws
+     * @throws IllegalArgumentException on out of range indices
      */
     default int requireInRange(final int index) {
         return Optional.of(index)
@@ -46,6 +46,7 @@ public interface Nuple {
      *
      * @param index an index.
      * @return an item class.
+     * @throws IllegalArgumentException on out of range indices
      */
     Class<?> nthRawType(final int index);
 
@@ -57,6 +58,7 @@ public interface Nuple {
      * @param expectedType the expected class.
      * @param <T>          the item type.
      * @return an item class.
+     * @throws IllegalArgumentException on out of range indices
      */
     <T> Class<T> nthType(final int index, final Class<T> expectedType);
 
@@ -68,6 +70,7 @@ public interface Nuple {
      * @param expectedType the expected class.
      * @param <T>          the item type.
      * @return an item.
+     * @throws IllegalArgumentException on out of range indices
      */
     <T> T nthMember(final int index, final Class<T> expectedType);
 
@@ -76,6 +79,7 @@ public interface Nuple {
      *
      * @param index an index.
      * @return an item.
+     * @throws IllegalArgumentException on out of range indices
      */
     Object nthRawMember(final int index);
 
@@ -110,8 +114,8 @@ public interface Nuple {
      * @param index an index.
      * @return an exception.
      */
-    static NoSuchElementException becauseNoMember(final int index) {
-        return becauseNonexistent("no member %s", index);
+    static IllegalArgumentException becauseNoMember(final int index) {
+        return becauseIllegal("no member %s", index);
     }
 
     /**

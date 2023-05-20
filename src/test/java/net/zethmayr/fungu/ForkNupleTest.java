@@ -7,8 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import static net.zethmayr.fungu.ForkFactory.forkOf;
 import static net.zethmayr.fungu.test.TestConstants.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 class ForkNupleTest implements TestsNuple {
 
@@ -20,79 +19,97 @@ class ForkNupleTest implements TestsNuple {
 
     @Test
     @Override
-    public void nthMember_whenPopulatedAndExpectedType_givenZero_returnsFirstValue() {
+    public void nthMember_whenPopulatedAndExpectedType_givenFirstIndex_returnsFirstValue() {
         underTest = forkOf(EXPECTED, UNEXPECTED);
 
-        Assertions.assertEquals(EXPECTED, zerostString());
+        assertEquals(EXPECTED, firstString());
     }
 
     @Test
     @Override
-    public void nthMember_whenPopulatedButNotExpectedType_givenZero_returnsFirstNull() {
+    public void nthMember_whenPopulatedButNotExpectedType_givenFirstIndex_returnsFirstNull() {
         underTest = forkOf(NOT_EVEN_WRONG, UNEXPECTED);
 
-        assertNull(zerostString());
+        assertNull(firstString());
     }
 
     @Test
     @Override
-    public void nthMember_whenPopulatedAndExpectedType_givenOne_returnsSecondValue() {
+    public void nthMember_whenNoSuchIndex_throws() {
+        underTest = forkOf(UNEXPECTED, UNEXPECTED);
+
+        assertThrows(IllegalArgumentException.class, () ->
+                underTest.nthMember(3, String.class));
+    }
+
+    @Test
+    @Override
+    public void nthMember_whenPopulatedAndExpectedType_givenLastIndex_returnsLastValue() {
         underTest = forkOf(NOT_EVEN_WRONG, EXPECTED);
 
-        Assertions.assertEquals(EXPECTED, onendString());
+        assertEquals(EXPECTED, lastString());
     }
 
     @Test
     @Override
-    public void nthMember_whenPopulatedButNotExpectedType_givenOne_returnsSecondNull() {
+    public void nthMember_whenPopulatedButNotExpectedType_givenLastIndex_returnsLastNull() {
         underTest = forkOf(UNEXPECTED, NOT_EVEN_WRONG);
 
-        assertNull(onendString());
+        assertNull(lastString());
     }
 
     @Test
     @Override
-    public void nthMember_whenAbsent_givenZero_returnsFirstNull() {
+    public void nthMember_whenAbsent_givenFirstIndex_returnsFirstNull() {
         underTest = forkOf(null, UNEXPECTED);
 
-        assertNull(zerostString());
+        assertNull(firstString());
     }
 
     @Test
     @Override
-    public void nthMember_whenAbsent_givenOne_returnsSecondNull() {
+    public void nthMember_whenAbsent_givenLastIndex_returnsLastNull() {
         underTest = forkOf(UNEXPECTED, null);
 
-        assertNull(onendString());
+        assertNull(lastString());
     }
 
     @Test
     @Override
-    public void nthType_whenPopulatedAndExpected_givenZero_returnsFirstType() {
+    public void nthType_whenPopulatedAndExpected_givenFirstIndex_returnsFirstType() {
         underTest = forkOf(EXPECTED, null);
 
-        assertEquals(String.class, zerostType());
+        assertEquals(String.class, firstType());
     }
 
     @Test
     @Override
-    public void nthType_whenPopulatedAndUnexpected_givenZero_returnsNull() {
+    public void nthType_whenPopulatedAndUnexpected_givenFirstIndex_returnsNull() {
         underTest = forkOf(NOT_EVEN_WRONG, UNEXPECTED);
 
-        assertNull(zerostType());
+        assertNull(firstType());
     }
 
     @Test
     @Override
-    public void nthType_whenAbsent_givenZero_returnsNull() {
+    public void nthType_whenNoSuchIndex_throws() {
+        underTest = forkOf(UNEXPECTED, UNEXPECTED);
+
+        assertThrows(IllegalArgumentException.class, () ->
+                underTest.nthType(4, String.class));
+    }
+
+    @Test
+    @Override
+    public void nthType_whenAbsent_givenFirstIndex_returnsNull() {
         underTest = forkOf(null, UNEXPECTED);
 
-        assertNull(zerostType());
+        assertNull(firstType());
     }
 
     @Test
     @Override
-    public void nthType_whenAbsent_givenOne_returnsNull() {
+    public void nthType_whenAbsent_givenLastIndex_returnsNull() {
         underTest = forkOf(UNEXPECTED, null);
 
         assertNull(underTest.nthType(1, String.class));

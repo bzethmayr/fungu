@@ -7,11 +7,14 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static net.zethmayr.fungu.ForkFactory.*;
-import static net.zethmayr.fungu.test.TestConstants.EXPECTED;
+import static net.zethmayr.fungu.test.TestConstants.*;
 import static net.zethmayr.fungu.test.TestHelper.invokeDefaultConstructor;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.jupiter.api.Assertions.*;
 
-class ForkFactoryTest {
+class ForkFactoryTest implements TestsFork {
 
     @Test
     void forkFactory_whenInstantiated_throws() {
@@ -82,5 +85,27 @@ class ForkFactoryTest {
                         assertEquals(top - 1, f.bottom());
                     }
                 });
+    }
+
+    @Test
+    @Override
+    public void equalValuedForksAreEqual() {
+        final Fork<String, String> underTest = forkOf(EXPECTED, SHIBBOLETH);
+        final Fork<String, String> equivalent = forkOf(EXPECTED, SHIBBOLETH);
+
+        assertThat(underTest, not(sameInstance(equivalent)));
+        assertEquals(equivalent, underTest);
+        assertEquals(underTest, equivalent);
+    }
+
+    @Test
+    @Override
+    public void distinctValuedForksAreDistinct() {
+        final Fork<String, String> underTest = forkOf(EXPECTED, EXPECTED);
+        final Fork<String, String> distinct = forkOf(UNEXPECTED, UNEXPECTED);
+
+        assertThat(underTest, not(sameInstance(distinct)));
+        assertNotEquals(distinct, underTest);
+        assertNotEquals(underTest, distinct);
     }
 }

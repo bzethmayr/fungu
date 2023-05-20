@@ -1,9 +1,10 @@
 package net.zethmayr.fungu.fields;
 
-import net.zethmayr.fungu.ReFork;
+import net.zethmayr.fungu.TypedFork;
 
 import java.util.function.Supplier;
 
+import static net.zethmayr.fungu.DecisionHelper.restricts;
 import static net.zethmayr.fungu.core.ExceptionFactory.becauseIllegal;
 import static net.zethmayr.fungu.core.ExceptionFactory.becauseNotInstantiable;
 
@@ -13,7 +14,7 @@ import static net.zethmayr.fungu.core.ExceptionFactory.becauseNotInstantiable;
  * @param <T> the top type
  * @param <B> the bottom type
  */
-public interface FieldFork<T, B> extends ReFork<T, B>, HasX {
+public interface FieldFork<T, B> extends TypedFork<T, B>, HasX {
     /**
      * Returns the gettable field interface associated with
      * the bottom item.
@@ -64,10 +65,10 @@ public interface FieldFork<T, B> extends ReFork<T, B>, HasX {
     default <H extends HasX, X> Supplier<X> getGetter(
             final Class<H> having, final Class<X> fieldClass
     ) {
-        if ((having == Top.class || having == topHas()) && fieldClass == topType()) {
+        if ((having == Top.class || having == topHas()) && !restricts(fieldClass, this::topType)) {
             return () -> (X) top();
         }
-        if ((having == Bottom.class || having == bottomHas()) && fieldClass == bottomType()) {
+        if ((having == Bottom.class || having == bottomHas()) && !restricts(fieldClass, this::bottomType)) {
             return () -> (X) bottom();
         }
         throw becauseIllegal("This fork does not have field %s with type %s", having, fieldClass);
