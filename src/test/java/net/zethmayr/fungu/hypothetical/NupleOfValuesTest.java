@@ -50,79 +50,97 @@ class NupleOfValuesTest implements TestsNuple {
 
     @Test
     @Override
-    public void nthMember_whenPopulatedAndExpectedType_givenZero_returnsFirstValue() {
+    public void nthMember_whenPopulatedAndExpectedType_givenFirstIndex_returnsFirstValue() {
         underTest = nupleOfValues(EXPECTED, UNEXPECTED);
 
-        assertEquals(EXPECTED, zerostString());
+        assertEquals(EXPECTED, firstString());
     }
 
     @Test
     @Override
-    public void nthMember_whenPopulatedButNotExpectedType_givenZero_returnsFirstNull() {
+    public void nthMember_whenPopulatedButNotExpectedType_givenFirstIndex_returnsFirstNull() {
         underTest = nupleOfValues(NOT_EVEN_WRONG, UNEXPECTED);
 
-        assertNull(zerostString());
+        assertNull(firstString());
     }
 
     @Test
     @Override
-    public void nthMember_whenPopulatedAndExpectedType_givenOne_returnsSecondValue() {
+    public void nthMember_whenNoSuchIndex_throws() {
+        underTest = nupleOfValues();
+
+        assertThrows(IllegalArgumentException.class, () ->
+                underTest.nthMember(0, String.class));
+    }
+
+    @Test
+    @Override
+    public void nthMember_whenPopulatedAndExpectedType_givenLastIndex_returnsLastValue() {
         underTest = nupleOfValues(UNEXPECTED, EXPECTED);
 
-        assertEquals(EXPECTED, onendString());
+        assertEquals(EXPECTED, lastString());
     }
 
     @Test
     @Override
-    public void nthMember_whenPopulatedButNotExpectedType_givenOne_returnsSecondNull() {
+    public void nthMember_whenPopulatedButNotExpectedType_givenLastIndex_returnsLastNull() {
         underTest = nupleOfValues(UNEXPECTED, NOT_EVEN_WRONG);
 
-        assertNull(onendString());
+        assertNull(lastString());
     }
 
     @Test
     @Override
-    public void nthMember_whenAbsent_givenZero_returnsFirstNull() {
+    public void nthMember_whenAbsent_givenFirstIndex_returnsFirstNull() {
         underTest = nupleOfValues(NULL_STRING, UNEXPECTED);
 
-        assertNull(zerostString());
+        assertNull(firstString());
     }
 
     @Test
     @Override
-    public void nthMember_whenAbsent_givenOne_returnsSecondNull() {
+    public void nthMember_whenAbsent_givenLastIndex_returnsLastNull() {
         underTest = nupleOfValues(UNEXPECTED, NULL_STRING);
 
-        assertNull(onendString());
+        assertNull(lastString());
     }
 
     @Test
     @Override
-    public void nthType_whenPopulatedAndExpected_givenZero_returnsFirstType() {
+    public void nthType_whenPopulatedAndExpected_givenFirstIndex_returnsFirstType() {
         underTest = nupleOfValues(EXPECTED, NOT_EVEN_WRONG);
 
-        assertEquals(String.class, zerostType());
+        assertEquals(String.class, firstType());
     }
 
     @Test
     @Override
-    public void nthType_whenPopulatedAndUnexpected_givenZero_returnsNull() {
+    public void nthType_whenPopulatedAndUnexpected_givenFirstIndex_returnsNull() {
         underTest = nupleOfValues(NOT_EVEN_WRONG, UNEXPECTED);
 
-        assertNull(zerostType());
+        assertNull(firstType());
     }
 
     @Test
     @Override
-    public void nthType_whenAbsent_givenZero_returnsNull() {
+    public void nthType_whenNoSuchIndex_throws() {
+        underTest = nupleOfValues(UNEXPECTED);
+
+        assertThrows(IllegalArgumentException.class, () ->
+                underTest.nthType(1, String.class));
+    }
+
+    @Test
+    @Override
+    public void nthType_whenAbsent_givenFirstIndex_returnsNull() {
         underTest = nupleOfValues(NULL_STRING, UNEXPECTED);
 
-        assertNull(zerostType());
+        assertNull(firstType());
     }
 
     @Test
     @Override
-    public void nthType_whenAbsent_givenOne_returnsNull() {
+    public void nthType_whenAbsent_givenLastIndex_returnsNull() {
         underTest = nupleOfValues(UNEXPECTED, NULL_STRING);
 
         assertNull(underTest.nthType(1, String.class));

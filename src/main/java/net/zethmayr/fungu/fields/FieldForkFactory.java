@@ -1,6 +1,11 @@
 package net.zethmayr.fungu.fields;
 
+import net.zethmayr.fungu.core.SuppressionConstants;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import static net.zethmayr.fungu.core.ExceptionFactory.becauseFactory;
+import static net.zethmayr.fungu.core.SuppressionConstants.CHECK_ASSURED;
 
 /**
  * Creates field-aware forks, such that
@@ -26,10 +31,18 @@ public final class FieldForkFactory {
      * @return a new field-aware fork.
      */
     public static <T, B> FieldFork<T, B> fieldForkOf(
-            final Class<? extends HasX> topHas, final Class<T> topType, final T top,
-            final Class<? extends HasX> bottomHas, final Class<B> bottomType, final B bottom
+            @NotNull final Class<? extends HasX> topHas, @NotNull final Class<T> topType, @Nullable final T top,
+            @NotNull final Class<? extends HasX> bottomHas, @NotNull final Class<B> bottomType, @Nullable final B bottom
     ) {
         return new FieldForkImpl<>(topHas, topType, top, bottomHas, bottomType, bottom);
+    }
+
+    @SuppressWarnings(CHECK_ASSURED)
+    public static <T, B> FieldFork<T, B> fieldForkOf(
+            @NotNull final Class<? extends HasX> topHas, @NotNull final T top,
+            @NotNull final Class<? extends HasX> bottomHas, @NotNull final B bottom
+    ) {
+        return fieldForkOf(topHas, (Class<T>) top.getClass(), top, bottomHas, (Class<B>) bottom.getClass(), bottom);
     }
 
     private record FieldForkImpl<T, B>(

@@ -35,6 +35,17 @@ public final class DecisionHelper {
     }
 
     /**
+     * Returns true if the given value restricts the supplied value.
+     * @param restriction the restriction, if any.
+     * @param source a supplier
+     * @return true when the restriction is present and not equal to the supplied value.
+     * @param <T> the value type.
+     */
+    public static <T> boolean restricts(@Nullable T restriction, Supplier<T> source) {
+        return restriction != null && restriction != source.get();
+    }
+
+    /**
      * Returns a function which applies the given test,
      * returning the first supplier result when the test passes
      * and the second supplier result when the test fails.

@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'net.zethmayr.fungu'
-version '1.0.2-SNAPSHOT'
+version '1.1.2-SNAPSHOT'
 description 'Functional Glue'
 
 static boolean isLocal(final String version) {
