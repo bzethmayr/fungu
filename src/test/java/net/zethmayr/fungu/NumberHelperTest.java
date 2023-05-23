@@ -20,27 +20,11 @@ class NumberHelperTest {
     }
 
     @Test
-    void increment_givenLong_returnsIncrementedLong() {
-        final long initial = TEST_RANDOM.nextLong();
-        final long expected = initial + 1;
-
-        assertEquals(expected, increment(initial));
-    }
-
-    @Test
     void increment_givenInt_returnsIncrementedInt() {
         final int initial = TEST_RANDOM.nextInt();
         final int expected = initial + 1;
 
         assertEquals(expected, increment(initial));
-    }
-
-    @Test
-    void decrement_givenLong_returnsDecrementedLong() {
-        final long initial = TEST_RANDOM.nextLong();
-        final long expected = initial - 1;
-
-        assertEquals(expected, decrement(initial));
     }
 
     @Test

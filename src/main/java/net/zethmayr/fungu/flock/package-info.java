@@ -1,4 +1,4 @@
 /**
- * (modified) vector clocks, hopefully - tired of locking.
+ * Vector clock implementation
  */
 package net.zethmayr.fungu.flock;

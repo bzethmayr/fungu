@@ -7,7 +7,8 @@ import java.util.Optional;
 import static java.util.Objects.nonNull;
 
 /**
- * Conceptually similar to an Either. Maybe it should be even more similar?
+ * Presents the result of some evaluation,
+ * either as the valid result or as an exception thrown.
  *
  * @param <T> the result type
  * @param <E> the exception type
@@ -17,6 +18,7 @@ public interface Result<T, E extends Exception> {
      * Returns a result if one is present.
      * In the case where the result is null as the result of successful evaluation,
      * no exception will be present.
+     *
      * @return a result, or null.
      */
     T get();
@@ -24,12 +26,15 @@ public interface Result<T, E extends Exception> {
     /**
      * Returns an exception if one is present.
      * No exception will be present if evaluation was successful.
+     *
      * @return a thrown exception.
      */
     E getException();
 
     /**
-     * Returns the result value if no exception is present.
+     * Returns the result value if no exception is present,
+     * or throws the exception.
+     *
      * @return the result value.
      * @throws E as thrown by evaluation.
      */
@@ -43,8 +48,9 @@ public interface Result<T, E extends Exception> {
     }
 
     /**
-     * Returns the raw result as an {@link Object}-
-     * a thrown exception or a result value.
+     * Returns the raw result as an {@link Object},
+     * which may be either a thrown exception or a result value.
+     *
      * @return the salient result
      */
     default Object getResult() {
