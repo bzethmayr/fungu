@@ -1,6 +1,5 @@
 package net.zethmayr.fungu.fields;
 
-import net.zethmayr.fungu.core.SuppressionConstants;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -37,6 +36,17 @@ public final class FieldForkFactory {
         return new FieldForkImpl<>(topHas, topType, top, bottomHas, bottomType, bottom);
     }
 
+    /**
+     * Creates a new field-aware fork with inferred types and non-null contents.
+     *
+     * @param topHas    the top gettable field interface.
+     * @param top       the top value.
+     * @param bottomHas the bottom gettable field interface.
+     * @param bottom    the bottom value.
+     * @param <T>       the top type.
+     * @param <B>       the bottom type.
+     * @return a new field-aware fork.
+     */
     @SuppressWarnings(CHECK_ASSURED)
     public static <T, B> FieldFork<T, B> fieldForkOf(
             @NotNull final Class<? extends HasX> topHas, @NotNull final T top,
