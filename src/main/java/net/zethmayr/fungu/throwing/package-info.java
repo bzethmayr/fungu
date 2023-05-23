@@ -1,7 +1,7 @@
 /**
  * Adapts methods throwing checked exceptions
  * to analogues deferring throw.
- * Example nonsense usage:
+ * Contrived example usage:
  * <pre>
  * final Closeable resource = getResource();
  * final Sink thrown = sink();

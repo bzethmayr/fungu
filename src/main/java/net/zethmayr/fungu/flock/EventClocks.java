@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static net.zethmayr.fungu.NumberHelper.longValues;
 import static net.zethmayr.fungu.core.ExceptionFactory.becauseIllegal;
