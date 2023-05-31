@@ -4,6 +4,7 @@ import net.zethmayr.fungu.core.ExceptionFactory;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static net.zethmayr.fungu.core.ExceptionFactory.becauseThrewImpossibly;
 
 /**
  * Provides a variety of simple exception sinks.
@@ -97,7 +98,7 @@ public final class SinkFactory {
         return new Immediately<E>() {
             @Override
             public void accept(E thrown) {
-                throw ExceptionFactory.becauseThrewImpossibly("mine struck", thrown);
+                throw becauseThrewImpossibly("mine struck", thrown);
             }
         };
     }

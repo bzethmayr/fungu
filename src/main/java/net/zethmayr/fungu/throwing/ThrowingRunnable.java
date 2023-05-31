@@ -7,6 +7,7 @@ import java.util.function.Consumer;
  *
  * @param <E> the exception type.
  */
+@FunctionalInterface
 public interface ThrowingRunnable<E extends Exception> extends Sinkable<Runnable, E> {
 
     /**

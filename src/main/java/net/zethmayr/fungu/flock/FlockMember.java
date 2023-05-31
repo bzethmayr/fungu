@@ -1,6 +1,6 @@
 package net.zethmayr.fungu.flock;
 
-import net.zethmayr.fungu.capabilities.ReuseResults;
+import net.zethmayr.fungu.declarations.ReuseResults;
 
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;

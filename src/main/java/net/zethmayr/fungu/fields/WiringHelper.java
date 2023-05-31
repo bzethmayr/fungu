@@ -99,7 +99,7 @@ public final class WiringHelper {
     }
 
     /**
-     * Wires getters and setters
+     * Wires getters, setters, and copiers
      * associated with the given class's field interface(s).
      *
      * @param declaring a class.
@@ -108,6 +108,7 @@ public final class WiringHelper {
     public static <E extends EditsX> void wireField(final Class<E> declaring) {
         wireGetters(declaring);
         wireSetters(declaring);
+        registerCopiers(declaring);
     }
 
     @SuppressWarnings(LOCAL_CONVENTION)
