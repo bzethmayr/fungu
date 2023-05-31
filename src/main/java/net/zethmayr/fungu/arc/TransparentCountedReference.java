@@ -1,6 +1,6 @@
 package net.zethmayr.fungu.arc;
 
-import net.zethmayr.fungu.capabilities.SingleUse;
+import net.zethmayr.fungu.declarations.SingleUse;
 import net.zethmayr.fungu.throwing.ThrowingConsumer;
 
 import java.io.Closeable;

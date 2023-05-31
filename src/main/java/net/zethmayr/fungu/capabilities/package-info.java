@@ -1,4 +1,4 @@
 /**
- * Annotations and interfaces providing bolt-on documentation or functionality.
+ * Interfaces providing bolt-on functionality.
  */
 package net.zethmayr.fungu.capabilities;

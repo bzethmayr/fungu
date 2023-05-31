@@ -1,6 +1,6 @@
 package net.zethmayr.fungu.arc;
 
-import net.zethmayr.fungu.capabilities.ReuseResults;
+import net.zethmayr.fungu.declarations.ReuseResults;
 
 import java.io.Closeable;
 

@@ -19,4 +19,27 @@ public interface Sink<E extends Exception> extends Consumer<E> {
      * @throws E received from sinkable implementation.
      */
     void raise() throws E;
+
+    default <C extends Exception> void raiseChecked(final Class<C> check) throws C {
+        try {
+            raise();
+        } catch (final Exception e) {
+            if (check.isAssignableFrom(e.getClass())) {
+                throw check.cast(e);
+            } else {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    default <C extends Exception> Sink<E> raiseOr(final Class<C> check) throws C {
+        try {
+            raise();
+        } catch (final Exception e) {
+            if (check.isAssignableFrom(e.getClass())) {
+                throw check.cast(e);
+            }
+        }
+        return this;
+    }
 }

@@ -9,6 +9,7 @@ import java.util.function.Supplier;
  * @param <T> the supplied type.
  * @param <E> the exception type.
  */
+@FunctionalInterface
 public interface ThrowingSupplier<T, E extends Exception> extends Sinkable<Supplier<T>, E> {
 
     /**

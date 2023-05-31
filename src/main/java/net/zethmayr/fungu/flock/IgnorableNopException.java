@@ -1,6 +1,6 @@
 package net.zethmayr.fungu.flock;
 
-import net.zethmayr.fungu.capabilities.SingleUse;
+import net.zethmayr.fungu.declarations.SingleUse;
 
 /**
  * This checked exception indicates that the operation has no-oped and can be retried,
