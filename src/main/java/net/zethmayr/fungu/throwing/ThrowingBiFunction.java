@@ -3,8 +3,23 @@ package net.zethmayr.fungu.throwing;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
+/**
+ * The throwing analogue of {@link BiFunction}.
+ * @param <T> the first argument type.
+ * @param <U> the second argument type.
+ * @param <R> the result type.
+ * @param <E> the thrown type.
+ */
 public interface ThrowingBiFunction<T, U, R, E extends Exception> extends Sinkable<BiFunction<T, U, R>, E> {
 
+    /**
+     * Given two values, returns a value.
+     * This is the throwing equivalent of {@link BiFunction#apply(Object, Object)}.
+     * @param first the first argument
+     * @param second the second argument.
+     * @return a value.
+     * @throws E if something goes wrong.
+     */
     R apply(final T first, final U second) throws E;
 
     /**

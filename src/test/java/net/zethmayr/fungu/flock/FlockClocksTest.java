@@ -6,23 +6,23 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.LongStream;
 
+import static net.zethmayr.fungu.flock.FlockClocks.proposeInsertValues;
 import static net.zethmayr.fungu.test.MatcherFactory.has;
 import static net.zethmayr.fungu.test.TestConstants.TEST_RANDOM;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
-class FlockMemberTest {
+class FlockClocksTest {
 
-    private FlockMember underTest;
+    private FlockClocks underTest;
 
     private static long randomSequence() {
         return TEST_RANDOM.nextLong();
     }
 
-    private static FlockMember secondOfThree() {
-        return new FlockMember(1, LongStream.generate(FlockMemberTest::randomSequence).limit(3).toArray());
+    private static FlockClocks secondOfThree() {
+        return new FlockClocks(1, LongStream.generate(FlockClocksTest::randomSequence).limit(3).toArray());
     }
 
     @Test
@@ -30,19 +30,7 @@ class FlockMemberTest {
 
         assertThrows(IllegalArgumentException.class, () ->
 
-                new FlockMember(0, new long[]{}));
-    }
-
-    @Test
-    void flockMember_givenEventClocks_returnsSimilarMember() {
-        final FlockMember comparison = secondOfThree();
-
-        final FlockMember underTest = new FlockMember(comparison.clockData());
-
-        assertThat(underTest, allOf(
-                has(FlockMember::localClock, comparison.localClock()),
-                has(FlockMember::clocks, comparison.clocks())
-        ));
+                new FlockClocks(0, new long[]{}));
     }
 
     @Test
@@ -101,6 +89,18 @@ class FlockMemberTest {
     }
 
     @Test
+    void addMember_whenOccursTwice_addsNewMemberThenIgnores() {
+        underTest = secondOfThree();
+        final long[] insertValues = underTest.proposeInsertValues(3);
+
+        underTest.addMember(3, insertValues);
+        assertEquals(4, underTest.clocks().length);
+
+        underTest.addMember(3, insertValues);
+        assertEquals(4, underTest.clocks().length);
+    }
+
+    @Test
     void retireMember_givenSequenceLessThanId_removesMemberMovingId() {
         underTest = secondOfThree();
         final long priorLocalValue = underTest.localClock();
@@ -153,5 +153,29 @@ class FlockMemberTest {
         assertEquals(1, trace.get().memberId());
         assertThat(trace.get().clocks()[1], greaterThan(priorLocalValue));
         assertThat(underTest.clocks()[0], equalTo(trace.get().clocks()[0]));
+    }
+
+    @Test
+    void messageReceived_givenTooManyClocks_throws() {
+        underTest = secondOfThree();
+        final FlockClocks remote = new FlockClocks(2, underTest.clocks());
+        remote.addMember(2, proposeInsertValues(2, remote.clocks()));
+
+        assertThrows(IgnorableNopException.class, () ->
+                underTest.messageReceived(remote.clocks()));
+    }
+
+    @Test
+    void messageReceived_givenAdvancedClock_mergesClocks() {
+        underTest = secondOfThree();
+        final long[] initial = underTest.clocks();
+        final FlockClocks remote = new FlockClocks(0, initial);
+        remote.localEvent();
+
+        final EventClocks result = assertDoesNotThrow(() -> underTest.messageReceived(remote.clocks()));
+
+        assertThat(result.clocks()[0], greaterThan(initial[0]));
+        assertThat(result.clocks()[1], greaterThan(initial[1]));
+        assertThat(result.clocks()[2], equalTo(initial[2]));
     }
 }
