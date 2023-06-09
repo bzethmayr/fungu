@@ -35,4 +35,9 @@ public class SuppressionConstants {
      * this code should be private.
      */
     public static final String LOCAL_CONVENTION = UNCHECKED;
+
+    /**
+     * The consumer will check the value or erase to the common type.
+     */
+    public static final String CONSUMER_CHECKS = UNCHECKED;
 }

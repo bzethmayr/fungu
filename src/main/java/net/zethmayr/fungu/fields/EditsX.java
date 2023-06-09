@@ -1,15 +1,13 @@
 package net.zethmayr.fungu.fields;
 
-import net.zethmayr.fungu.core.ExceptionFactory;
-
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.function.*;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import static net.zethmayr.fungu.core.ExceptionFactory.becauseUnsupported;
-import static net.zethmayr.fungu.core.ExceptionFactory.unsupportedBecause;
-import static net.zethmayr.fungu.core.SupplierFactory.from;
 
 /**
  * Provides facilities for copying field values.
@@ -22,10 +20,10 @@ public interface EditsX extends HasX, SetsX {
      * taking the value from this instance
      * and providing it to the consumed instance.
      *
-     * @param editable   the interface to be mutated.
+     * @param editable   the edited interface.
      * @param fieldClass the interface providing the value.
-     * @param <E>        the edited interface
-     * @param <T>        the field value interface.
+     * @param <E>        the edited type.
+     * @param <T>        the field value type.
      * @return a visitor that copies values from this instance.
      */
     default <E extends EditsX, T> Consumer<E> getFieldCopier(
@@ -37,12 +35,27 @@ public interface EditsX extends HasX, SetsX {
     }
 
     /**
+     * Returns a visitor that
+     * applies the copier function,
+     * taking all values from this instance
+     * and providing them to the consumed instance.
+     *
+     * @param editable the edited interface.
+     * @param <E>      the edited type.
+     * @return a visitor that copies values from this instance.
+     */
+    default <E extends EditsX> Consumer<E> getCopier(final Class<E> editable) {
+        return getFieldCopier(editable, null);
+    }
+
+    /**
      * Returns a copier for a given editable scope.
-     * @param editable the editable type.
+     *
+     * @param editable  the editable type.
      * @param fieldType the (optional) field type.
+     * @param <E>       the editable type.
+     * @param <T>       the (optional) field type.
      * @return a bi-consumer copying fields from the first to the second argument.
-     * @param <E> the editable type.
-     * @param <T> the (optional) field type.
      */
     static <E extends EditsX, T> BiConsumer<E, E> getCopyFunction(
             final Class<E> editable, final Class<T> fieldType
@@ -54,10 +67,10 @@ public interface EditsX extends HasX, SetsX {
      * Runs the provided generator to register an editable class's copier,
      * if none is already present.
      *
-     * @param editable the editable class.
+     * @param editable        the editable class.
      * @param copierGenerator a copier generating method.
-     * @param <E> the editable type.
-     * @param <T> the (optional) field type.
+     * @param <E>             the editable type.
+     * @param <T>             the (optional) field type.
      */
     static <E extends EditsX, T> void registerCopyFunction(
             final Class<E> editable, final Supplier<BiConsumer<E, E>> copierGenerator
@@ -80,7 +93,7 @@ public interface EditsX extends HasX, SetsX {
         <E extends EditsX> BiConsumer<E, E> getCopyFunction(
                 final Class<E> declaring
         ) {
-            return  Optional.ofNullable((BiConsumer<E, E>) copiers.get(declaring))
+            return Optional.ofNullable((BiConsumer<E, E>) copiers.get(declaring))
                     .orElseThrow(() -> becauseUnsupported("no copier for %s in %s", declaring, copiers));
         }
 

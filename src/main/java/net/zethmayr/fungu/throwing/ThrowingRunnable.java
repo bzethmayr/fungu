@@ -2,6 +2,8 @@ package net.zethmayr.fungu.throwing;
 
 import java.util.function.Consumer;
 
+import static net.zethmayr.fungu.core.SuppressionConstants.CONSUMER_CHECKS;
+
 /**
  * The throwing analogue of {@link Runnable}.
  *
@@ -19,6 +21,7 @@ public interface ThrowingRunnable<E extends Exception> extends Sinkable<Runnable
     void run() throws E;
 
     @Override
+    @SuppressWarnings(CONSUMER_CHECKS)
     default Runnable sinking(final Consumer<E> sink) {
         return () -> {
             try {

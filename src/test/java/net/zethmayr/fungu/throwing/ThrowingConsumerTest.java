@@ -1,6 +1,5 @@
 package net.zethmayr.fungu.throwing;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.Closeable;
@@ -19,7 +18,8 @@ class ThrowingConsumerTest implements TestsSinkable {
     @Override
     public void sinking_givenSink_givenTarget_whenNoException_raiseDoesNotThrow() {
         final Sink<IOException> sink = sink();
-        final Closeable closes = () -> {};
+        final Closeable closes = () -> {
+        };
 
         final Consumer<Closeable> sunk = example.sinking(sink);
         sunk.accept(closes);
