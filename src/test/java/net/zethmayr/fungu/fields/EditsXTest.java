@@ -1,7 +1,5 @@
 package net.zethmayr.fungu.fields;
 
-import net.zethmayr.fungu.test.TestConstants;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -55,7 +53,7 @@ class EditsXTest {
 
         assertNotEquals(EXPECTED, target.getFoo());
         assertNotEquals(SHIBBOLETH, target.getBar());
-        final Consumer<TestEditsBoth> underTest = complex.getFieldCopier(TestEditsBoth.class, null);
+        final Consumer<TestEditsBoth> underTest = complex.getCopier(TestEditsBoth.class);
         underTest.accept(target);
 
         assertEquals(EXPECTED, target.getFoo());
@@ -63,7 +61,7 @@ class EditsXTest {
     }
 
     @Test
-    void getCopier_whenCopiersRegistered_givenSingleFieldClasses_returnsCopiers_copiersCopySeparateValues() {
+    void getFieldCopier_whenCopiersRegistered_givenSingleFieldClasses_returnsCopiers_copiersCopySeparateValues() {
         final TestEditsFoo editsFoo = new TestEditsFoo(EXPECTED);
         final EditsBar editsBar = new TestEditsBoth();
         editsBar.setBar(SHIBBOLETH);
@@ -74,6 +72,7 @@ class EditsXTest {
         final Consumer<EditsFoo> copiesFoo = editsFoo.getFieldCopier(EditsFoo.class, String.class);
         final Consumer<EditsBar> copiesBar = editsBar.getFieldCopier(EditsBar.class, String.class);
         copiesFoo.accept(target);
+        assertNotEquals(SHIBBOLETH, target.getBar());
         copiesBar.accept(target);
 
         assertEquals(EXPECTED, target.getFoo());
@@ -87,7 +86,7 @@ class EditsXTest {
         final TestEditsQuux target = new TestEditsQuux();
 
         assertNotEquals(expected, target.getQuux());
-        final Consumer<EditsQuux> copiesQuux = source.getFieldCopier(EditsQuux.class, null);
+        final Consumer<EditsQuux> copiesQuux = source.getCopier(EditsQuux.class);
         copiesQuux.accept(target);
 
         assertEquals(expected, target.getQuux());

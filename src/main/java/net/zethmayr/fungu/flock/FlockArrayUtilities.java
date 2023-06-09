@@ -11,12 +11,6 @@ final class FlockArrayUtilities {
     }
 
 
-    static void rangeCheck(final long[] primary, final long[] secondary) {
-        if (primary.length != secondary.length) {
-            throw becauseDissimilar();
-        }
-    }
-
     static <T> void rangeCheck(final long[] primary, final T[] secondary) {
         if (primary.length != secondary.length) {
             throw becauseDissimilar();
@@ -24,16 +18,17 @@ final class FlockArrayUtilities {
     }
 
     static void rangeCheck(final int index, final long[] values) {
-        if (index >= values.length) {
+        if (index >= values.length || index < 0) {
             throw becauseOutOfRange(index);
         }
     }
 
     static <T> void rangeCheck(final int index, final T[] values) {
-        if (index >= values.length) {
+        if (index >= values.length || index < 0) {
             throw becauseOutOfRange(index);
         }
     }
+
 
     static Long[] box(final long[] primitives) {
         final Long[] boxed = new Long[primitives.length];

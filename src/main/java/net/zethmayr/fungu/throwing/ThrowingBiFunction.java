@@ -3,6 +3,8 @@ package net.zethmayr.fungu.throwing;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
+import static net.zethmayr.fungu.core.SuppressionConstants.CONSUMER_CHECKS;
+
 /**
  * The throwing analogue of {@link BiFunction}.
  * @param <T> the first argument type.
@@ -27,6 +29,7 @@ public interface ThrowingBiFunction<T, U, R, E extends Exception> extends Sinkab
      * Returns null when an exception was thrown.
      */
     @Override
+    @SuppressWarnings(CONSUMER_CHECKS)
     default BiFunction<T, U, R> sinking(final Consumer<E> sink) {
         return (t, u) -> {
             try {
@@ -37,4 +40,5 @@ public interface ThrowingBiFunction<T, U, R, E extends Exception> extends Sinkab
             return null;
         };
     }
+
 }

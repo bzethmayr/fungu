@@ -7,6 +7,7 @@ import java.util.function.ToLongFunction;
 import java.util.stream.IntStream;
 
 import static net.zethmayr.fungu.core.ExceptionFactory.becauseIllegal;
+import static net.zethmayr.fungu.flock.FlockArrayUtilities.box;
 
 /**
  * Presents a stable view of the clock values for a given event.
@@ -43,6 +44,7 @@ public interface EventClocks extends Comparable<EventClocks> {
      *
      * @see #compareSimilarVectors(long[], long[])
      */
+    @Override
     default int compareTo(@NotNull final EventClocks compared) {
         return compareSimilarVectors(clocks(), compared.clocks());
     }
@@ -104,7 +106,7 @@ public interface EventClocks extends Comparable<EventClocks> {
             final T[] ourClocks, final ToLongFunction<T> ourUnboxer,
             final long[] theirClocks
     ) {
-        return compareSimilarVectors(ourClocks, ourUnboxer, FlockArrayUtilities.box(theirClocks), Long::longValue);
+        return compareSimilarVectors(ourClocks, ourUnboxer, box(theirClocks), Long::longValue);
     }
 
     /**
@@ -123,7 +125,7 @@ public interface EventClocks extends Comparable<EventClocks> {
             final U[] theirClocks,
             final ToLongFunction<U> theirUnboxer
     ) {
-        return compareSimilarVectors(FlockArrayUtilities.box(ourClocks), Long::longValue, theirClocks, theirUnboxer);
+        return compareSimilarVectors(box(ourClocks), Long::longValue, theirClocks, theirUnboxer);
     }
 
     /**
@@ -134,6 +136,6 @@ public interface EventClocks extends Comparable<EventClocks> {
      * @see #compareSimilarVectors(Object[], ToLongFunction, Object[], ToLongFunction)
      */
     static int compareSimilarVectors(final long[] ourClocks, final long[] theirClocks) {
-        return compareSimilarVectors(FlockArrayUtilities.box(ourClocks), Long::longValue, FlockArrayUtilities.box(theirClocks), Long::longValue);
+        return compareSimilarVectors(box(ourClocks), Long::longValue, box(theirClocks), Long::longValue);
     }
 }

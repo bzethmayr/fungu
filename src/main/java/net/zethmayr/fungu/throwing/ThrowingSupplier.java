@@ -3,6 +3,8 @@ package net.zethmayr.fungu.throwing;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import static net.zethmayr.fungu.core.SuppressionConstants.CONSUMER_CHECKS;
+
 /**
  * The throwing analogue of {@link Supplier}
  *
@@ -26,6 +28,7 @@ public interface ThrowingSupplier<T, E extends Exception> extends Sinkable<Suppl
      * Supplies null when an exception was thrown.
      */
     @Override
+    @SuppressWarnings(CONSUMER_CHECKS)
     default Supplier<T> sinking(final Consumer<E> sink) {
         return () -> {
             try {

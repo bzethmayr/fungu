@@ -2,6 +2,8 @@ package net.zethmayr.fungu.throwing;
 
 import java.util.function.Consumer;
 
+import static net.zethmayr.fungu.core.SuppressionConstants.CONSUMER_CHECKS;
+
 /**
  * As {@link Consumer<T>}, but
  * the {@link #accept(T)} method
@@ -23,6 +25,7 @@ public interface ThrowingConsumer<T, E extends Exception> extends Sinkable<Consu
      * {@inheritDoc}
      */
     @Override
+    @SuppressWarnings(CONSUMER_CHECKS)
     default Consumer<T> sinking(final Consumer<E> sink) {
         return t -> {
             try {
