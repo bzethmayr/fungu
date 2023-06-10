@@ -6,16 +6,24 @@ import net.zethmayr.fungu.throwing.Sink;
 import net.zethmayr.fungu.throwing.ThrowingFunction;
 
 import java.net.URISyntaxException;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+import static net.zethmayr.fungu.DecisionHelper.maybeWith;
+import static net.zethmayr.fungu.UponHelper.upon;
+import static net.zethmayr.fungu.UponHelper.with;
 import static net.zethmayr.fungu.core.ExceptionFactory.becauseImpossible;
 import static net.zethmayr.fungu.flock.EventClocks.compareSimilarVectors;
 import static net.zethmayr.fungu.flock.FlockArrayUtilities.rangeCheck;
-import static net.zethmayr.fungu.flock.IgnorableNopException.becauseNotYetPossible;
+import static net.zethmayr.fungu.flock.PermanentNopException.becausePermanentNop;
+import static net.zethmayr.fungu.flock.PermanentNopException.permanentNopBecause;
+import static net.zethmayr.fungu.flock.RetryableNopException.becauseRetryNop;
 import static net.zethmayr.fungu.throwing.SinkFactory.sink;
 import static net.zethmayr.fungu.throwing.Sinkable.sinking;
 
@@ -24,13 +32,18 @@ import static net.zethmayr.fungu.throwing.Sinkable.sinking;
  */
 public class FlockClocks {
 
-    private volatile int memberId;
+    private final AtomicInteger memberId;
     private final AtomicReference<FlockMember[]> clocks;
 
     private record ClockData(int memberId, long[] clocks) implements EventClocks {
     }
 
     private final Object lock = new Object();
+
+    private static Supplier<PermanentNopException> BECAUSE_ADDITION_OBSOLETE =
+            permanentNopBecause("Addition is obsolete");
+    private static Supplier<PermanentNopException> BECAUSE_RETIREMENT_OBSOLETE =
+            permanentNopBecause("Retirement is obsolete");
 
     /**
      * Creates a new member based on the given ID and clocks.
@@ -47,7 +60,7 @@ public class FlockClocks {
     @ReuseResults
     public FlockClocks(final int memberId, final long[] clocks) {
         rangeCheck(memberId, clocks);
-        this.memberId = memberId;
+        this.memberId = new AtomicInteger(memberId);
         this.clocks = new AtomicReference<>(
                 LongStream.of(clocks)
                         .mapToObj(FlockMember::new)
@@ -65,7 +78,7 @@ public class FlockClocks {
     @ReuseResults
     public FlockClocks(final int memberId, final KnownMember[] initialMembers) throws URISyntaxException {
         rangeCheck(memberId, initialMembers);
-        this.memberId = memberId;
+        this.memberId = new AtomicInteger(memberId);
         final Sink<URISyntaxException> badLocation = sink();
         final FlockMember[] initialClocks = new FlockMember[initialMembers.length];
         IntStream.range(0, initialMembers.length)
@@ -85,7 +98,7 @@ public class FlockClocks {
      */
     public long localEvent() {
         synchronized (lock) {
-            return clocks.get()[memberId].incrementAndGet();
+            return clocks.get()[memberId.getOpaque()].incrementAndGet();
         }
     }
 
@@ -96,21 +109,30 @@ public class FlockClocks {
      *
      * @param sentClocks the remote clock values.
      * @return updated local clocks from the message.
-     * @throws IgnorableNopException if the clock vectors are different lengths.
+     * @throws RetryableNopException if the clock vectors are different lengths.
+     * @throws PermanentNopException if the remote advances the local clock
      */
-    public EventClocks messageReceived(final long[] sentClocks) throws IgnorableNopException {
+    public EventClocks messageReceived(final long[] sentClocks) throws NopException {
         final EventClocks clockData;
         synchronized (lock) {
             final FlockMember[] oldClocks = clocks.get(); // identical reference copy
             if (sentClocks.length == oldClocks.length) {
+                checkImpersonationWithinLock(sentClocks);
                 localEvent();
                 mergeValuesOntoCounters(sentClocks, oldClocks); // does not need to update reference
             } else {
-                throw becauseNotYetPossible("Size disagreement");
+                throw becauseRetryNop("Size disagreement");
             }
             clockData = clockData();
         }
         return clockData;
+    }
+
+    private void checkImpersonationWithinLock(final long[] sentClocks) throws PermanentNopException {
+        final long max = getLocalClockWithinLock();
+        if (sentClocks[memberId.getOpaque()] > max) {
+            throw becausePermanentNop("Remote advance over local");
+        }
     }
 
     /**
@@ -124,7 +146,7 @@ public class FlockClocks {
         IntStream.range(0, oldClocks.length)
                 .parallel()
                 .forEach(n -> {
-                    if (sentClocks[n] > oldClocks[n].getAcquire()) {
+                    if (sentClocks[n] > oldClocks[n].get()) {
                         /*
                          * in the case where the same number of dissimilar inserts have occurred,
                          * the results will at least temporarily converge to higher values...
@@ -161,14 +183,14 @@ public class FlockClocks {
      */
     public EventClocks clockData() {
         synchronized (lock) {
-            return new ClockData(memberId, clocks());
+            return new ClockData(memberId.get(), clocks());
         }
     }
 
     /**
      * Runs a local event that
      * will not make reference to the clock values
-     * from when it is run.
+     * from when it is started.
      * <p>
      * Note that sampling the local values from within the event
      * has no guarantee of returning relevant values.
@@ -183,7 +205,7 @@ public class FlockClocks {
     /**
      * Runs a local event that
      * receives the relevant clock data
-     * from when it is run.
+     * from when it is started.
      * <p>
      * Note that sampling the local values from within the event
      * has no guarantee of returning relevant values.
@@ -201,6 +223,10 @@ public class FlockClocks {
         clockedEvent.accept(clocks);
     }
 
+    private long getLocalClockWithinLock() {
+        return clocks.get()[memberId.get()].get();
+    }
+
     /**
      * Returns the current local clock value,
      * with no further consistency guarantees.
@@ -209,13 +235,12 @@ public class FlockClocks {
      */
     public long localClock() {
         synchronized (lock) {
-            return clocks.get()[memberId].getAcquire();
+            return getLocalClockWithinLock();
         }
     }
 
     /**
-     * Returns the current known clock values,
-     * with no further consistency guarantees.
+     * Returns the current known clock values.
      *
      * @return the known clock values.
      */
@@ -224,16 +249,14 @@ public class FlockClocks {
     }
 
     /**
-     * Returns the current values from the given counters,
-     * without strong consistency guarantees -
-     * interleaved increments may still occur.
+     * Returns the current values from the given counters.
      *
      * @param proposed some clock counters.
      * @return the counter values.
      */
     static long[] clockValues(final FlockMember[] proposed) {
         return Stream.of(proposed)
-                .mapToLong(FlockMember::getAcquire)
+                .mapToLong(FlockMember::get)
                 .toArray();
     }
 
@@ -244,18 +267,19 @@ public class FlockClocks {
      *
      * @param newIndex   an index no greater than the local vector length.
      * @param sentClocks proposed new minimum clocks.
+     * @throws PermanentNopException if the proposed insertion is inconsistent with the current clocks.
+     * @throws IllegalArgumentException if the index is not within the valid range.
      */
-    public void addMember(final int newIndex, final long[] sentClocks) {
+    public void addMember(final int newIndex, final long[] sentClocks) throws PermanentNopException {
         synchronized (lock) {
-            final FlockMember[] moreClocks = proposeInsertion(newIndex);
-            if ((sentClocks.length == moreClocks.length)
-                    && compareSimilarVectors(sentClocks, moreClocks, FlockMember::getAcquire) != -1) {
-                mergeValuesOntoCounters(sentClocks, moreClocks);
-                clocks.set(moreClocks);
-                if (memberId >= newIndex) {
-                    memberId += 1;
-                }
-            }
+            Optional.of(proposeInsertion(newIndex))
+                    .filter(a -> a.length == sentClocks.length)
+                    .filter(a -> compareSimilarVectors(sentClocks, a, FlockMember::get) != -1)
+                    .map(with(a -> mergeValuesOntoCounters(sentClocks, a),
+                            clocks::set))
+                    .map(a -> memberId)
+                    .map(maybeWith(m -> m.get() >= newIndex, AtomicInteger::incrementAndGet))
+                    .orElseThrow(BECAUSE_ADDITION_OBSOLETE);
         }
     }
 
@@ -289,6 +313,7 @@ public class FlockClocks {
      */
     public static long[] proposeInsertValues(final int newIndex, final long[] oldClocks) {
         final long[] moreClocks = new long[oldClocks.length + 1];
+        rangeCheck(newIndex, moreClocks);
         System.arraycopy(oldClocks, 0, moreClocks, 0, newIndex);
         moreClocks[newIndex] = 0L;
         if (newIndex < oldClocks.length) {
@@ -316,21 +341,23 @@ public class FlockClocks {
      *
      * @param oldIndex   an index smaller than the local vector length.
      * @param sentClocks proposed new minimum counts.
+     * @throws PermanentNopException if the proposed removal is inconsistent with the current clocks.
+     * @throws IllegalStateException if removing the node at this index - we are presumed to have crashed.
+     * @throws IllegalArgumentException if the index is not within the valid range.
      */
-    public void retireMember(final int oldIndex, final long[] sentClocks) {
+    public void retireMember(final int oldIndex, final long[] sentClocks) throws PermanentNopException {
         synchronized (lock) {
-            if (memberId == oldIndex) {
+            if (memberId.get() == oldIndex) {
                 throw becauseImpossible("This instance %s is already presumed dead", memberId);
             }
-            final FlockMember[] lessClocks = proposeDeletion(oldIndex);
-            if ((sentClocks.length == lessClocks.length)
-                    && compareSimilarVectors(sentClocks, lessClocks, FlockMember::getAcquire) != -1) {
-                mergeValuesOntoCounters(sentClocks, lessClocks);
-                clocks.set(lessClocks);
-                if (memberId > oldIndex) {
-                    memberId -= 1;
-                }
-            }
+            Optional.of(proposeDeletion(oldIndex))
+                    .filter(a -> a.length == sentClocks.length)
+                    .filter(a -> compareSimilarVectors(sentClocks, a, FlockMember::get) != -1)
+                    .map(with(a -> mergeValuesOntoCounters(sentClocks, a),
+                            clocks::set))
+                    .map(a -> memberId)
+                    .map(maybeWith(m -> m.get() > oldIndex, AtomicInteger::decrementAndGet))
+                    .orElseThrow(BECAUSE_RETIREMENT_OBSOLETE);
         }
     }
 
@@ -344,6 +371,7 @@ public class FlockClocks {
      */
     FlockMember[] proposeDeletion(final int oldIndex) {
         final FlockMember[] oldClocks = clocks.get();
+        rangeCheck(oldIndex, oldClocks);
         final FlockMember[] lessClocks = new FlockMember[oldClocks.length - 1];
         System.arraycopy(oldClocks, 0, lessClocks, 0, oldIndex);
         if (oldIndex < lessClocks.length) {

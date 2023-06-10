@@ -1,6 +1,5 @@
 package net.zethmayr.fungu.flock;
 
-import net.zethmayr.fungu.declarations.ReuseResults;
 import net.zethmayr.fungu.flock.config.KnownMember;
 
 import java.net.URI;
@@ -13,8 +12,9 @@ class FlockMember {
 
     /**
      * Returns a member with the given initial clock value and location.
+     *
      * @param initialValue the initial clock value.
-     * @param location the expected network location.
+     * @param location     the expected network location.
      */
     public FlockMember(final long initialValue, final URI location) {
         clock = new AtomicLong(initialValue);
@@ -23,6 +23,7 @@ class FlockMember {
 
     /**
      * Returns a local, solely index-addressable member without a network location.
+     *
      * @param initialValue the initial count value.
      */
     public FlockMember(final long initialValue) {
@@ -33,8 +34,8 @@ class FlockMember {
         this(initialConfig.getInitialValue(), initialConfig.getLocationUri());
     }
 
-    long getAcquire() {
-        return clock.getAcquire();
+    long get() {
+        return clock.get();
     }
 
     void set(final long newValue) {
@@ -43,5 +44,9 @@ class FlockMember {
 
     long incrementAndGet() {
         return clock.incrementAndGet();
+    }
+
+    URI getLocation() {
+        return location;
     }
 }

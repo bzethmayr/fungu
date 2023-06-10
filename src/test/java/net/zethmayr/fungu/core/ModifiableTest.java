@@ -1,8 +1,10 @@
-package net.zethmayr.fungu;
+package net.zethmayr.fungu.core;
 
+import net.zethmayr.fungu.core.Modifiable;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -48,6 +50,18 @@ class ModifiableTest {
             foo = foo << shift + bar >> shift;
             bar = quux;
         }
+    }
+
+    @Test
+    void modified_whenChained_returnsFinalResult() {
+        final Consumer<TestModifiable> setTwo = m -> m.set(2);
+        final TestModifiable underTest = new TestModifiable(1, 1)
+                .modified(setTwo)
+                .modified(setTwo)
+                .modified(TestModifiable::compute);
+
+        assertNotEquals(2, underTest.get());
+        assertNotEquals(2, underTest.get());
     }
 
     @Test

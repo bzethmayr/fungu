@@ -3,11 +3,10 @@ package net.zethmayr.fungu;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
+import java.util.function.*;
 
 import static java.util.Objects.isNull;
+import static net.zethmayr.fungu.UponHelper.upon;
 import static net.zethmayr.fungu.core.ExceptionFactory.becauseStaticsOnly;
 import static net.zethmayr.fungu.core.SupplierFactory.nothing;
 
@@ -36,10 +35,11 @@ public final class DecisionHelper {
 
     /**
      * Returns true if the given value restricts the supplied value.
+     *
      * @param restriction the restriction, if any.
-     * @param source a supplier
+     * @param source      a supplier
+     * @param <T>         the value type.
      * @return true when the restriction is present and not equal to the supplied value.
-     * @param <T> the value type.
      */
     public static <T> boolean restricts(@Nullable T restriction, Supplier<T> source) {
         return restriction != null && restriction != source.get();
@@ -143,7 +143,7 @@ public final class DecisionHelper {
      * returning the given result when the test passes,
      * and null when the test fails.
      *
-     * @param test   the tested type.
+     * @param test   the test.
      * @param result the result for passing tests.
      * @param <T>    the tested type.
      * @param <R>    the result type.
@@ -154,5 +154,26 @@ public final class DecisionHelper {
             @NotNull final Predicate<T> test, @Nullable final R result
     ) {
         return maybeResult(test, result, nothing());
+    }
+
+    /**
+     * Returns a function which applies the given test,
+     * applying the given changes when the test passes,
+     * and always returning the instance passed.
+     *
+     * @param test    the test.
+     * @param changes changes to apply when the test passes.
+     * @param <T>     the common type.
+     * @return a mutative identity function.
+     */
+    @NotNull
+    @SafeVarargs
+    public static <T> UnaryOperator<T> maybeWith(
+            @NotNull final Predicate<T> test,
+            final Consumer<? super T>... changes
+    ) {
+        return t -> test.test(t)
+                ? upon(t, changes)
+                : t;
     }
 }

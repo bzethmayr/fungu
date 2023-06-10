@@ -3,6 +3,7 @@ package net.zethmayr.fungu;
 import net.zethmayr.fungu.throwing.ThrowingConsumer;
 
 import java.util.function.Consumer;
+import java.util.function.UnaryOperator;
 
 import static net.zethmayr.fungu.core.ExceptionFactory.becauseStaticsOnly;
 
@@ -31,6 +32,22 @@ public final class UponHelper {
             change.accept(target);
         }
         return target;
+    }
+
+    /**
+     * Returns an operator
+     * that applies the given changes
+     * and returns the instance passed.
+     *
+     * @param changes any changes.
+     * @param <T>     the common type.
+     * @return a mutative identity operator.
+     */
+    @SafeVarargs
+    public static <T> UnaryOperator<T> with(
+            final Consumer<? super T>... changes
+    ) {
+        return t -> upon(t, changes);
     }
 
     /**

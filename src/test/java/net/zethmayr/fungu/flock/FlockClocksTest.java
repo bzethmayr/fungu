@@ -48,7 +48,8 @@ class FlockClocksTest {
         underTest = secondOfThree();
         final long priorLastValue = underTest.clocks()[2];
 
-        underTest.addMember(2, underTest.proposeInsertValues(2));
+        assertDoesNotThrow(() ->
+                underTest.addMember(2, underTest.proposeInsertValues(2)));
 
         assertEquals(priorLastValue, underTest.clocks()[3]);
     }
@@ -58,7 +59,8 @@ class FlockClocksTest {
         underTest = secondOfThree();
         final long priorLastValue = underTest.clocks()[2];
 
-        underTest.addMember(3, underTest.proposeInsertValues(3));
+        assertDoesNotThrow(() ->
+                underTest.addMember(3, underTest.proposeInsertValues(3)));
 
         assertEquals(priorLastValue, underTest.clocks()[2]);
     }
@@ -68,7 +70,8 @@ class FlockClocksTest {
         underTest = secondOfThree();
         final long priorLocalValue = underTest.localClock();
 
-        underTest.addMember(1, underTest.proposeInsertValues(1));
+        assertDoesNotThrow(() ->
+                underTest.addMember(1, underTest.proposeInsertValues(1)));
 
         assertEquals(0L, underTest.clocks()[1]);
         assertEquals(priorLocalValue, underTest.localClock());
@@ -81,7 +84,8 @@ class FlockClocksTest {
         final long priorFirstValue = underTest.clocks()[0];
         final long priorLocalCount = underTest.localClock();
 
-        underTest.addMember(0, underTest.proposeInsertValues(0));
+        assertDoesNotThrow(() ->
+                underTest.addMember(0, underTest.proposeInsertValues(0)));
 
         assertEquals(0L, underTest.clocks()[0]);
         assertEquals(priorFirstValue, underTest.clocks()[1]);
@@ -93,10 +97,12 @@ class FlockClocksTest {
         underTest = secondOfThree();
         final long[] insertValues = underTest.proposeInsertValues(3);
 
-        underTest.addMember(3, insertValues);
+        assertDoesNotThrow(() ->
+                underTest.addMember(3, insertValues));
         assertEquals(4, underTest.clocks().length);
 
-        underTest.addMember(3, insertValues);
+        assertThrows(PermanentNopException.class, () ->
+                underTest.addMember(3, insertValues));
         assertEquals(4, underTest.clocks().length);
     }
 
@@ -105,7 +111,8 @@ class FlockClocksTest {
         underTest = secondOfThree();
         final long priorLocalValue = underTest.localClock();
 
-        underTest.retireMember(0, underTest.proposeDeleteValues(0));
+        assertDoesNotThrow(() ->
+                underTest.retireMember(0, underTest.proposeDeleteValues(0)));
 
         assertEquals(priorLocalValue, underTest.clocks()[0]);
     }
@@ -123,7 +130,8 @@ class FlockClocksTest {
         underTest = secondOfThree();
         final long priorLocalValue = underTest.localClock();
 
-        underTest.retireMember(2, underTest.proposeDeleteValues(2));
+        assertDoesNotThrow(() ->
+                underTest.retireMember(2, underTest.proposeDeleteValues(2)));
 
         assertEquals(priorLocalValue, underTest.clocks()[1]);
     }
@@ -159,9 +167,10 @@ class FlockClocksTest {
     void messageReceived_givenTooManyClocks_throws() {
         underTest = secondOfThree();
         final FlockClocks remote = new FlockClocks(2, underTest.clocks());
-        remote.addMember(2, proposeInsertValues(2, remote.clocks()));
+        assertDoesNotThrow(() ->
+                remote.addMember(2, proposeInsertValues(2, remote.clocks())));
 
-        assertThrows(IgnorableNopException.class, () ->
+        assertThrows(RetryableNopException.class, () ->
                 underTest.messageReceived(remote.clocks()));
     }
 
@@ -177,5 +186,10 @@ class FlockClocksTest {
         assertThat(result.clocks()[0], greaterThan(initial[0]));
         assertThat(result.clocks()[1], greaterThan(initial[1]));
         assertThat(result.clocks()[2], equalTo(initial[2]));
+    }
+
+    @Test
+    void messageReceived_givenRemotelyAdvancedOwnClock_throws() {
+
     }
 }
