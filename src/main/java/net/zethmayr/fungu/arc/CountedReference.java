@@ -1,6 +1,6 @@
 package net.zethmayr.fungu.arc;
 
-import net.zethmayr.fungu.declarations.ReuseResults;
+import net.zethmayr.fungu.core.declarations.ReuseResults;
 import net.zethmayr.fungu.throwing.Sink;
 import net.zethmayr.fungu.throwing.ThrowingConsumer;
 

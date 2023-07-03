@@ -1,11 +1,10 @@
-package net.zethmayr.fungu;
-
-import net.zethmayr.fungu.throwing.ThrowingRunnable;
-import net.zethmayr.fungu.throwing.ThrowingSupplier;
+package net.zethmayr.fungu.throwing;
 
 import java.util.function.Supplier;
 
 import static net.zethmayr.fungu.core.ExceptionFactory.becauseAdaptersOnly;
+import static net.zethmayr.fungu.core.SuppressionConstants.CONSUMER_CHECKS;
+import static net.zethmayr.fungu.throwing.SunkenException.becauseSunken;
 
 /**
  * Wraps results of evaluations.
@@ -25,7 +24,19 @@ public final class ResultFactory {
      * @return a result with a value.
      */
     public static <T, E extends Exception> Result<T, E> success(final T value) {
-        return new SimpleResult<>(value, null);
+        return new SuccessResult<>(value);
+    }
+
+    private record SuccessResult<T, E extends Exception>(T value) implements Result<T, E> {
+        @Override
+        public T get() {
+            return value;
+        }
+
+        @Override
+        public E getException() {
+            return null;
+        }
     }
 
     /**
@@ -37,7 +48,19 @@ public final class ResultFactory {
      * @return a result with an exception.
      */
     public static <T, E extends Exception> Result<T, E> failure(final E thrown) {
-        return new SimpleResult<>(null, thrown);
+        return new FailedResult<>(thrown);
+    }
+
+    private record FailedResult<T, E extends Exception>(E thrown) implements Result<T, E> {
+        @Override
+        public T get() {
+            throw becauseSunken(thrown);
+        }
+
+        @Override
+        public E getException() {
+            return thrown;
+        }
     }
 
     /**
@@ -66,12 +89,13 @@ public final class ResultFactory {
      * @param <E>    the exception type.
      * @return a result.
      */
+    @SuppressWarnings(CONSUMER_CHECKS)
     public static <E extends Exception> Result<Void, E> evaluateThrowing(final ThrowingRunnable<E> source) {
         try {
             source.run();
             return success(null);
         } catch (final Exception thrown) {
-            return failure((E) thrown); //TODO consider a checked sink
+            return failure((E) thrown);
         }
     }
 
@@ -102,24 +126,12 @@ public final class ResultFactory {
      * @param <E>    the exception type.
      * @return a result.
      */
+    @SuppressWarnings(CONSUMER_CHECKS)
     public static <T, E extends Exception> Result<T, E> evaluateThrowing(final ThrowingSupplier<T, E> source) {
         try {
             return success(source.get());
         } catch (final Exception thrown) {
             return failure((E) thrown);
-        }
-    }
-
-    private record SimpleResult<T, E extends Exception>(T value, E thrown) implements Result<T, E> {
-
-        @Override
-        public T get() {
-            return value;
-        }
-
-        @Override
-        public E getException() {
-            return thrown;
         }
     }
 }

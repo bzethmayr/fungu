@@ -1,6 +1,8 @@
 package net.zethmayr.fungu.core;
 
+import static net.zethmayr.fungu.core.ExceptionFactory.becauseConstantsOnly;
 import static net.zethmayr.fungu.core.SuppressionConstants.LiteralValues.UNCHECKED;
+import static net.zethmayr.fungu.core.SuppressionConstants.LiteralValues.UNUSED;
 
 /**
  * Defines constants used to document uses of {@link SuppressWarnings}.
@@ -8,16 +10,18 @@ import static net.zethmayr.fungu.core.SuppressionConstants.LiteralValues.UNCHECK
 public class SuppressionConstants {
 
     private SuppressionConstants() {
-        throw ExceptionFactory.becauseConstantsOnly();
+        throw becauseConstantsOnly();
     }
 
     static final class LiteralValues {
 
         private LiteralValues() {
-            throw ExceptionFactory.becauseConstantsOnly();
+            throw becauseConstantsOnly();
         }
 
         static final String UNCHECKED = "unchecked";
+
+        static final String UNUSED = "unused";
     }
 
     /**
@@ -40,4 +44,9 @@ public class SuppressionConstants {
      * The consumer will check the value or erase to the common type.
      */
     public static final String CONSUMER_CHECKS = UNCHECKED;
+
+    /**
+     * This method exists to provide specification for implementations.
+     */
+    public static final String SPECIFICATION = UNUSED;
 }

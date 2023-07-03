@@ -1,8 +1,9 @@
-package net.zethmayr.fungu;
+package net.zethmayr.fungu.core;
 
-import net.zethmayr.fungu.core.ExceptionFactory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.function.Function;
 
 import static java.util.Objects.nonNull;
 import static net.zethmayr.fungu.core.ExceptionFactory.becauseStaticsOnly;
@@ -29,5 +30,18 @@ public final class TypeHelper {
         return nonNull(inspected)
                 ? inspected.getClass()
                 : nullType;
+    }
+
+    /**
+     * Returns a function that
+     * returns the concrete type of arguments,
+     * or the given type.
+     *
+     * @param nullType the default type.
+     * @return a non-nullable typing function.
+     */
+    @NotNull
+    public static Function<@Nullable Object, @NotNull Class<?>> defaultingType(@NotNull final Class<?> nullType) {
+        return t -> typeOrDefault(t, nullType);
     }
 }

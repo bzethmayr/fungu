@@ -8,7 +8,7 @@ import java.util.function.UnaryOperator;
 import static net.zethmayr.fungu.core.ExceptionFactory.becauseStaticsOnly;
 
 /**
- * Provides methods that implement the visitor pattern.
+ * Provides methods that implement the chained mutator and visitor patterns.
  */
 public final class UponHelper {
 
@@ -17,7 +17,8 @@ public final class UponHelper {
     }
 
     /**
-     * Returns the target after visiting it with all given consumers.
+     * Provides chained mutator syntax for any mutable class, by
+     * returning the given target after visiting it with all given consumers.
      *
      * @param target  a target instance.
      * @param changes any changes.
@@ -42,6 +43,7 @@ public final class UponHelper {
      * @param changes any changes.
      * @param <T>     the common type.
      * @return a mutative identity operator.
+     * @see #upon(Object, Consumer[])
      */
     @SafeVarargs
     public static <T> UnaryOperator<T> with(
@@ -51,6 +53,7 @@ public final class UponHelper {
     }
 
     /**
+     * Provides chained mutator syntax over void methods that throw checked exceptions.
      * Returns the target after visiting it with all given consumers.
      *
      * @param target  a target instance.

@@ -1,6 +1,7 @@
 package net.zethmayr.fungu.flock;
 
 import net.zethmayr.fungu.flock.config.KnownMember;
+import org.jetbrains.annotations.NotNull;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -16,18 +17,9 @@ class FlockMember {
      * @param initialValue the initial clock value.
      * @param location     the expected network location.
      */
-    public FlockMember(final long initialValue, final URI location) {
+    public FlockMember(final long initialValue, @NotNull final URI location) {
         clock = new AtomicLong(initialValue);
         this.location = location;
-    }
-
-    /**
-     * Returns a local, solely index-addressable member without a network location.
-     *
-     * @param initialValue the initial count value.
-     */
-    public FlockMember(final long initialValue) {
-        this(initialValue, null);
     }
 
     public FlockMember(final KnownMember initialConfig) throws URISyntaxException {

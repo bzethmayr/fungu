@@ -1,5 +1,6 @@
 package net.zethmayr.fungu.fields;
 
+import net.zethmayr.fungu.Fork;
 import net.zethmayr.fungu.fields.FieldFork.Bottom;
 import net.zethmayr.fungu.fields.FieldFork.Top;
 import net.zethmayr.fungu.hypothetical.TestsNuple;
@@ -21,7 +22,7 @@ class FieldForkTest implements TestsFieldFork, TestsNuple {
 
     private FieldFork<?, ?> underTest;
 
-    public FieldFork<?, ?> underTest() {
+    public FieldFork<?, ?> nupleUnderTest() {
         return underTest;
     }
 
@@ -44,6 +45,14 @@ class FieldForkTest implements TestsFieldFork, TestsNuple {
         assertThrows(UnsupportedOperationException.class, () ->
 
                 invokeDefaultConstructor(FieldForkFactory.class));
+    }
+
+    @Test
+    @Override
+    public void arity_returnsSomeValue() {
+        underTest = fieldForkOf(HasFoo.class, EXPECTED, HasBar.class, EXPECTED);
+
+        assertThat(underTest, hasArityAtLeast(2));
     }
 
     @Test
@@ -154,7 +163,7 @@ class FieldForkTest implements TestsFieldFork, TestsNuple {
     }
 
     private static FieldFork<String, String> empty(
-          final Class<? extends HasX> top, final Class<? extends HasX> bottom
+            final Class<? extends HasX> top, final Class<? extends HasX> bottom
     ) {
         return fieldForkOf(top, String.class, null, bottom, String.class, null);
     }
@@ -296,18 +305,56 @@ class FieldForkTest implements TestsFieldFork, TestsNuple {
     }
 
     @Test
-    void with_whenFieldsAndTypesAndValues_returnsForkWithExpectedNewValues() {
+    @Override
+    public void with_givenNewValues_returnsSameConcreteType() {
         final FieldFork<String, String> underTest = fieldForkOf(
                 HasBar.class, String.class, UNEXPECTED,
                 HasFoo.class, String.class, NULL_STRING
         );
 
-        final FieldFork<String, String> result = (FieldFork<String, String>) underTest.with(EXPECTED, SHIBBOLETH);
+        final Fork<String, String> result = underTest.with(EXPECTED, SHIBBOLETH);
 
-        assertThat(result, hasFieldValues(
+        assertThat(result, not(sameInstance(underTest)));
+        assertThat(result, instanceOf(underTest.getClass()));
+        assertThat((FieldFork<String, String>) result, hasFieldValues(
                 HasBar.class, String.class, EXPECTED,
                 HasFoo.class, String.class, SHIBBOLETH
         ));
     }
 
+    @Test
+    @Override
+    public void withBottom_givenNewBottomValue_returnsSameTopAndConcreteType() {
+        final FieldFork<String, String> underTest = fieldForkOf(
+                HasBar.class, SHIBBOLETH,
+                HasFoo.class, SHIBBOLETH
+        );
+
+        final FieldFork<String, String> result = (FieldFork<String, String>) underTest.withBottom(EXPECTED);
+
+        assertThat(result, not(sameInstance(underTest)));
+        assertThat(result, instanceOf(underTest.getClass()));
+        assertThat(result, hasFieldValues(
+                HasBar.class, String.class, SHIBBOLETH,
+                HasFoo.class, String.class, EXPECTED
+        ));
+    }
+
+    @Test
+    @Override
+    public void withTop_givenNewTopValue_returnsSameBottomAndConcreteType() {
+        final FieldFork<String, String> underTest = fieldForkOf(
+                HasBar.class, SHIBBOLETH,
+                HasFoo.class, SHIBBOLETH
+        );
+
+        final FieldFork<String, String> result = (FieldFork<String, String>) underTest.withTop(EXPECTED);
+
+        assertThat(result, not(sameInstance(underTest)));
+        assertThat(result, instanceOf(underTest.getClass()));
+        assertThat(result, hasFieldValues(
+                HasBar.class, String.class, EXPECTED,
+                HasFoo.class, String.class, SHIBBOLETH
+        ));
+    }
 }

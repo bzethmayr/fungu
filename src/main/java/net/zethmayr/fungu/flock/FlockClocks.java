@@ -1,26 +1,30 @@
 package net.zethmayr.fungu.flock;
 
-import net.zethmayr.fungu.declarations.ReuseResults;
+import net.zethmayr.fungu.core.declarations.ReuseResults;
 import net.zethmayr.fungu.flock.config.KnownMember;
 import net.zethmayr.fungu.throwing.Sink;
 import net.zethmayr.fungu.throwing.ThrowingFunction;
+import org.jetbrains.annotations.NotNull;
 
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.function.IntBinaryOperator;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static net.zethmayr.fungu.DecisionHelper.maybeWith;
-import static net.zethmayr.fungu.UponHelper.upon;
+import static net.zethmayr.fungu.throwing.ResultFactory.evaluateThrowing;
 import static net.zethmayr.fungu.UponHelper.with;
 import static net.zethmayr.fungu.core.ExceptionFactory.becauseImpossible;
 import static net.zethmayr.fungu.flock.EventClocks.compareSimilarVectors;
 import static net.zethmayr.fungu.flock.FlockArrayUtilities.rangeCheck;
+import static net.zethmayr.fungu.flock.FlockClocks.IndexAdjustment.INSERTION;
+import static net.zethmayr.fungu.flock.FlockClocks.IndexAdjustment.NONE;
 import static net.zethmayr.fungu.flock.PermanentNopException.becausePermanentNop;
 import static net.zethmayr.fungu.flock.PermanentNopException.permanentNopBecause;
 import static net.zethmayr.fungu.flock.RetryableNopException.becauseRetryNop;
@@ -40,10 +44,12 @@ public class FlockClocks {
 
     private final Object lock = new Object();
 
-    private static Supplier<PermanentNopException> BECAUSE_ADDITION_OBSOLETE =
+    private static final Supplier<PermanentNopException> BECAUSE_ADDITION_OBSOLETE =
             permanentNopBecause("Addition is obsolete");
-    private static Supplier<PermanentNopException> BECAUSE_RETIREMENT_OBSOLETE =
+    private static final Supplier<PermanentNopException> BECAUSE_RETIREMENT_OBSOLETE =
             permanentNopBecause("Retirement is obsolete");
+
+    private static final URI NO_LOCATION = evaluateThrowing(() -> new URI("")).get();
 
     /**
      * Creates a new member based on the given ID and clocks.
@@ -58,12 +64,13 @@ public class FlockClocks {
      * @throws IllegalArgumentException if the ID is out of range of the given clocks.
      */
     @ReuseResults
-    public FlockClocks(final int memberId, final long[] clocks) {
+    public FlockClocks(final int memberId, final long[] clocks, final URI[] locations) {
         rangeCheck(memberId, clocks);
+        rangeCheck(clocks, locations);
         this.memberId = new AtomicInteger(memberId);
         this.clocks = new AtomicReference<>(
-                LongStream.of(clocks)
-                        .mapToObj(FlockMember::new)
+                IntStream.range(0, clocks.length)
+                        .mapToObj(x -> new FlockMember(clocks[x], locations[x]))
                         .toArray(FlockMember[]::new)
         );
     }
@@ -117,7 +124,7 @@ public class FlockClocks {
         synchronized (lock) {
             final FlockMember[] oldClocks = clocks.get(); // identical reference copy
             if (sentClocks.length == oldClocks.length) {
-                checkImpersonationWithinLock(sentClocks);
+                checkImpersonationWithinLock(sentClocks, NONE, 0);
                 localEvent();
                 mergeValuesOntoCounters(sentClocks, oldClocks); // does not need to update reference
             } else {
@@ -128,9 +135,35 @@ public class FlockClocks {
         return clockData;
     }
 
-    private void checkImpersonationWithinLock(final long[] sentClocks) throws PermanentNopException {
+    enum IndexAdjustment implements IntBinaryOperator {
+        NONE {
+            @Override
+            public int applyAsInt(final int index, final int ignored) {
+                return index;
+            }
+        },
+        INSERTION {
+            @Override
+            public int applyAsInt(final int index, final int newIndex) {
+                return index < newIndex
+                        ? index
+                        : index + 1;
+            }
+        },
+        DELETION {
+            @Override
+            public int applyAsInt(final int index, final int oldIndex) {
+                return index < oldIndex
+                        ? index
+                        : index - 1;
+            }
+        }
+    }
+
+    private void checkImpersonationWithinLock(final long[] sentClocks, final IndexAdjustment adjustment, final int changePoint) throws PermanentNopException {
+        final int adjustedId = adjustment.applyAsInt(memberId.get(), changePoint);
         final long max = getLocalClockWithinLock();
-        if (sentClocks[memberId.getOpaque()] > max) {
+        if (sentClocks[adjustedId] > max) {
             throw becausePermanentNop("Remote advance over local");
         }
     }
@@ -248,6 +281,12 @@ public class FlockClocks {
         return clockValues(clocks.get());
     }
 
+    public URI[] locations() {
+        return Stream.of(clocks.get())
+                .map(FlockMember::getLocation)
+                .toArray(URI[]::new);
+    }
+
     /**
      * Returns the current values from the given counters.
      *
@@ -267,12 +306,13 @@ public class FlockClocks {
      *
      * @param newIndex   an index no greater than the local vector length.
      * @param sentClocks proposed new minimum clocks.
-     * @throws PermanentNopException if the proposed insertion is inconsistent with the current clocks.
+     * @throws PermanentNopException    if the proposed insertion is inconsistent with the current clocks.
      * @throws IllegalArgumentException if the index is not within the valid range.
      */
-    public void addMember(final int newIndex, final long[] sentClocks) throws PermanentNopException {
+    public void addMember(final int newIndex, final URI newLocation, final long[] sentClocks) throws PermanentNopException {
         synchronized (lock) {
-            Optional.of(proposeInsertion(newIndex))
+            checkImpersonationWithinLock(sentClocks, INSERTION, newIndex);
+            Optional.of(proposeInsertion(newIndex, newLocation))
                     .filter(a -> a.length == sentClocks.length)
                     .filter(a -> compareSimilarVectors(sentClocks, a, FlockMember::get) != -1)
                     .map(with(a -> mergeValuesOntoCounters(sentClocks, a),
@@ -291,11 +331,11 @@ public class FlockClocks {
      * @param newIndex an index no greater than the local vector length.
      * @return new proposed counters accommodating the new index.
      */
-    FlockMember[] proposeInsertion(final int newIndex) {
+    FlockMember[] proposeInsertion(final int newIndex, @NotNull final URI newLocation) {
         final FlockMember[] oldClocks = clocks.get();
         final FlockMember[] moreClocks = new FlockMember[oldClocks.length + 1];
         System.arraycopy(oldClocks, 0, moreClocks, 0, newIndex);
-        moreClocks[newIndex] = new FlockMember(0L);
+        moreClocks[newIndex] = new FlockMember(0L, newLocation);
         if (newIndex < oldClocks.length) {
             System.arraycopy(oldClocks, newIndex, moreClocks, newIndex + 1, oldClocks.length - newIndex);
         }
@@ -331,7 +371,7 @@ public class FlockClocks {
      * @return new proposed values accommodating the new index.
      */
     public long[] proposeInsertValues(final int newIndex) {
-        return clockValues(proposeInsertion(newIndex));
+        return clockValues(proposeInsertion(newIndex, null));
     }
 
     /**
@@ -341,8 +381,8 @@ public class FlockClocks {
      *
      * @param oldIndex   an index smaller than the local vector length.
      * @param sentClocks proposed new minimum counts.
-     * @throws PermanentNopException if the proposed removal is inconsistent with the current clocks.
-     * @throws IllegalStateException if removing the node at this index - we are presumed to have crashed.
+     * @throws PermanentNopException    if the proposed removal is inconsistent with the current clocks.
+     * @throws IllegalStateException    if removing the node at this index - we are presumed to have crashed.
      * @throws IllegalArgumentException if the index is not within the valid range.
      */
     public void retireMember(final int oldIndex, final long[] sentClocks) throws PermanentNopException {

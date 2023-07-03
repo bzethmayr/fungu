@@ -1,4 +1,4 @@
-package net.zethmayr.fungu.core;
+package net.zethmayr.fungu;
 
 import java.util.function.Consumer;
 

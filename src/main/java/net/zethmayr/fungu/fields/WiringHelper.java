@@ -45,6 +45,7 @@ public final class WiringHelper {
     public static <H extends HasX> void findGetters(
             final Class<H> encountered, final BiConsumer<Class<? extends HasX>, Method> getterHandler
     ) {
+        // doesn't use caches, at least not directly
         final Method[] candidates = Stream.of(encountered.getMethods())
                 .filter(m -> m.getDeclaringClass() == encountered)
                 .filter(m -> m.getParameterCount() == 0)

@@ -5,7 +5,7 @@ import net.zethmayr.fungu.hypothetical.Nuple;
 
 import java.util.Optional;
 
-import static net.zethmayr.fungu.TypeHelper.typeOrDefault;
+import static net.zethmayr.fungu.core.TypeHelper.typeOrDefault;
 
 /**
  * A tuple with a top and bottom value.
@@ -14,7 +14,6 @@ import static net.zethmayr.fungu.TypeHelper.typeOrDefault;
  * @param <B> the bottom type.
  */
 public interface Fork<T, B> extends Nuple {
-
     /**
      * Exception message format for out-of-range nuple indices.
      */
@@ -30,21 +29,14 @@ public interface Fork<T, B> extends Nuple {
         return 2;
     }
 
-    /**
-     * Returns the top value.
-     *
-     * @return the top value.
-     */
+
     T top();
 
-    /**
-     * Returns the bottom value.
-     *
-     * @return the bottom value.
-     */
     B bottom();
 
     /**
+     * Returns a new fork with
+     * the same concrete type and values.
      * Implementations must create a new instance of their class.
      *
      * @param top    a top value
@@ -52,16 +44,6 @@ public interface Fork<T, B> extends Nuple {
      * @return a new fork of the same concrete type.
      */
     Fork<T, B> with(final T top, final B bottom);
-
-    /**
-     * Returns a new fork with
-     * the same concrete type and values.
-     *
-     * @return a new fork of the same concrete type.
-     */
-    default Fork<T, B> copy() {
-        return with(top(), bottom());
-    }
 
     /**
      * Returns a new fork with

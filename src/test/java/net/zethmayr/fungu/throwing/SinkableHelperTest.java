@@ -3,9 +3,13 @@ package net.zethmayr.fungu.throwing;
 import net.zethmayr.fungu.test.ExampleCheckedException;
 import org.junit.jupiter.api.Test;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.IntSummaryStatistics;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static net.zethmayr.fungu.test.TestConstants.EXPECTED;
 import static net.zethmayr.fungu.test.TestHelper.invokeDefaultConstructor;
@@ -61,5 +65,44 @@ class SinkableHelperTest {
 
         assertNotEquals(EXPECTED, result);
         assertDoesNotThrow(sink::raise);
+    }
+
+    static String supplierExample() throws ExampleCheckedException {
+        throw new ExampleCheckedException(EXPECTED);
+    }
+
+    @Test
+    void sinkable_givenImplicitlySinkableSupplier_returnsExplicitlySinkableSupplier() {
+        final Sink<ExampleCheckedException> sink = sink();
+
+        final Supplier<String> sunk = sinking(sinkable(SinkableHelperTest::supplierExample), sink);
+        final String result = sunk.get();
+
+        assertNull(result);
+        assertThrows(ExampleCheckedException.class, sink::raise);
+    }
+
+    @Test
+    void sinkable_givenImplicitlySinkableConsumer_returnsExplicitlySinkableConsumer() {
+        final Sink<IOException> sink = sink();
+
+        final Consumer<Closeable> sunk = sinking(sinkable(Closeable::close), sink);
+        sunk.accept(null);
+
+        assertThrows(NullPointerException.class, sink::raise);
+    }
+
+    void runnableExample() throws ExampleCheckedException {
+        throw new ExampleCheckedException(EXPECTED);
+    }
+
+    @Test
+    void sinkable_givenImplicitlySinkableRunnable_returnsExplicitlySinkableRunnable() {
+        final Sink<ExampleCheckedException> sink = sink();
+
+        final Runnable sunk = sinking(sinkable(this::runnableExample), sink);
+        sunk.run();
+
+        assertThrows(ExampleCheckedException.class, sink::raise);
     }
 }

@@ -1,4 +1,4 @@
-package net.zethmayr.fungu.declarations;
+package net.zethmayr.fungu.core.declarations;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;

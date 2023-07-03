@@ -13,7 +13,7 @@ final class FlockArrayUtilities {
 
     static <T> void rangeCheck(final long[] primary, final T[] secondary) {
         if (primary.length != secondary.length) {
-            throw becauseDissimilar();
+            throw becauseLengthDisagreement();
         }
     }
 
@@ -44,7 +44,7 @@ final class FlockArrayUtilities {
         return becauseIllegal("ID %s is out of range", index);
     }
 
-    static IllegalArgumentException becauseDissimilar() {
-        return becauseIllegal("Cannot merge dissimilar vectors");
+    static IllegalArgumentException becauseLengthDisagreement() {
+        return becauseIllegal("Length disagreement");
     }
 }

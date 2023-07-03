@@ -1,6 +1,5 @@
-package net.zethmayr.fungu.core;
+package net.zethmayr.fungu;
 
-import net.zethmayr.fungu.core.Modifiable;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicInteger;

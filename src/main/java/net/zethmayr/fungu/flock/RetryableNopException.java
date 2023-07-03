@@ -11,6 +11,7 @@ public class RetryableNopException extends NopException {
     /**
      * Creates a new instance
      * with the given retryable rejection reason.
+     *
      * @param message the rejection reason.
      */
     public RetryableNopException(final String message) {
@@ -20,6 +21,7 @@ public class RetryableNopException extends NopException {
     /**
      * Returns a new instance
      * with the given retryable rejection reason.
+     *
      * @param message the rejection reason.
      * @return a new exception.
      */
@@ -30,6 +32,7 @@ public class RetryableNopException extends NopException {
     /**
      * Returns an exception supplier
      * with the given retryable rejection reason.
+     *
      * @param message the rejection reason.
      * @return an exception supplier.
      */

@@ -4,14 +4,14 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.function.Supplier;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static net.zethmayr.fungu.ForkFactory.*;
 import static net.zethmayr.fungu.test.TestConstants.*;
 import static net.zethmayr.fungu.test.TestHelper.invokeDefaultConstructor;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.sameInstance;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ForkFactoryTest implements TestsFork {
@@ -51,11 +51,12 @@ class ForkFactoryTest implements TestsFork {
                 .forEach(f -> assertTrue(f.top() < f.bottom()));
     }
 
+    @Test
     void combine_givenBiFunction_whenMappedOnForks_combinesToValues() {
         Stream.of(
-                forkOf("dinner", 4),
-                forkOf("seafood", 3),
-                forkOf("barbecue", 2))
+                        forkOf("dinner", 4),
+                        forkOf("seafood", 3),
+                        forkOf("barbecue", 2))
 
                 .map(combine((s, n) -> s.length() + n))
 
@@ -64,11 +65,11 @@ class ForkFactoryTest implements TestsFork {
 
     @Test
     void overOrdinal_givenNothing_whenMapped_returnsForksOverOrdinal() {
-        Stream.of(4, 3, 2, 1)
-
+        IntStream.rangeClosed(1, 4)
+                .map(n -> 5 - n)
+                .boxed()
                 .map(overOrdinal())
-
-                .forEach(f -> assertEquals(4, f.top() +  f.bottom()));
+                .forEach(f -> assertEquals(4, f.top() + f.bottom()));
     }
 
     @Test
@@ -107,5 +108,50 @@ class ForkFactoryTest implements TestsFork {
         assertThat(underTest, not(sameInstance(distinct)));
         assertNotEquals(distinct, underTest);
         assertNotEquals(underTest, distinct);
+    }
+
+    @Test
+    @Override
+    public void with_givenNewValues_returnsSameConcreteType() {
+        final String originalValue = UNEXPECTED;
+        final Fork<String, String> underTest = forkOf(originalValue, originalValue);
+        final Class<?> expectedClass = underTest.getClass();
+
+        final Fork<String, String> revalued = underTest.with(EXPECTED, SHIBBOLETH);
+
+        assertThat(revalued, not(sameInstance(underTest)));
+        assertThat(revalued, instanceOf(expectedClass));
+        assertThat(revalued, hasValues(EXPECTED, SHIBBOLETH));
+        assertThat(underTest, hasValues(originalValue));
+    }
+
+    @Test
+    @Override
+    public void withBottom_givenNewBottomValue_returnsSameTopAndConcreteType() {
+        final String originalValue = SHIBBOLETH;
+        final Fork<String, String> underTest = forkOf(originalValue, originalValue);
+        final Class<?> expectedClass = underTest.getClass();
+
+        final Fork<String, String> revalued = underTest.withBottom(EXPECTED);
+
+        assertThat(revalued, not(sameInstance(underTest)));
+        assertThat(revalued, instanceOf(expectedClass));
+        assertThat(revalued, hasValues(originalValue, EXPECTED));
+        assertThat(underTest, hasValues(originalValue));
+    }
+
+    @Test
+    @Override
+    public void withTop_givenNewTopValue_returnsSameBottomAndConcreteType() {
+        final String originalValue = SHIBBOLETH;
+        final Fork<String, String> underTest = forkOf(originalValue, originalValue);
+        final Class<?> expectedClass = underTest.getClass();
+
+        final Fork<String, String> revalued = underTest.withTop(EXPECTED);
+
+        assertThat(revalued, not(sameInstance(underTest)));
+        assertThat(revalued, instanceOf(expectedClass));
+        assertThat(revalued, hasValues(EXPECTED, originalValue));
+        assertThat(underTest, hasValues(originalValue));
     }
 }
