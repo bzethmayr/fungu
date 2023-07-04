@@ -1,6 +1,6 @@
 package net.zethmayr.fungu.core;
 
-import net.zethmayr.fungu.declarations.ReuseResults;
+import net.zethmayr.fungu.core.declarations.ReuseResults;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

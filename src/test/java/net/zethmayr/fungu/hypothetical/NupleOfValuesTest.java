@@ -1,11 +1,13 @@
 package net.zethmayr.fungu.hypothetical;
 
+import jdk.jfr.Percentage;
 import org.junit.jupiter.api.Test;
 
 import static net.zethmayr.fungu.hypothetical.Nuple.nupleOfTypedValues;
 import static net.zethmayr.fungu.hypothetical.Nuple.nupleOfValues;
 import static net.zethmayr.fungu.test.TestConstants.*;
 import static net.zethmayr.fungu.test.TestHelper.invokeDefaultConstructor;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 class NupleOfValuesTest implements TestsNuple {
@@ -17,6 +19,14 @@ class NupleOfValuesTest implements TestsNuple {
         assertThrows(UnsupportedOperationException.class, () ->
 
                 invokeDefaultConstructor(Nuple.NupleFactory.class));
+    }
+
+    @Test
+    @Override
+    public void arity_returnsSomeValue() {
+        final Nuple underTest = nupleOfValues(SHIBBOLETH, EXPECTED, UNEXPECTED);
+
+        assertThat(underTest, hasArityAtLeast(3));
     }
 
     @Test
@@ -44,7 +54,7 @@ class NupleOfValuesTest implements TestsNuple {
     }
 
     @Override
-    public Nuple underTest() {
+    public Nuple nupleUnderTest() {
         return underTest;
     }
 

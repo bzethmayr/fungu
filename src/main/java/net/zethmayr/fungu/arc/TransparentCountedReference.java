@@ -1,6 +1,6 @@
 package net.zethmayr.fungu.arc;
 
-import net.zethmayr.fungu.declarations.SingleUse;
+import net.zethmayr.fungu.core.declarations.SingleUse;
 import net.zethmayr.fungu.throwing.ThrowingConsumer;
 
 import java.io.Closeable;
@@ -19,11 +19,12 @@ import static net.zethmayr.fungu.core.ExceptionFactory.becauseUnsupported;
  * instead of by constructing subclass instances directly:
  * <code>
  * try (final Connection cxn = openTransparent(RecursiveConnection::new) {
- *     // cxn uses
+ * // cxn uses
  * }
  * </code>
  * If calling code closes the resource before the try-with-resources construct would have done so,
  * subsequent uses will fail visibly.
+ *
  * @param <R> the resource type.
  */
 public abstract class TransparentCountedReference<R extends Closeable> extends SimpleCountedReference<R> {
@@ -50,6 +51,7 @@ public abstract class TransparentCountedReference<R extends Closeable> extends S
      * Calling code needs to call {@link Closeable#close()} on the resource instance
      * when done using it.
      * The resource will not actually be closed until all references are closed.
+     *
      * @return the open, closeable resource.
      */
     @Override
@@ -69,29 +71,13 @@ public abstract class TransparentCountedReference<R extends Closeable> extends S
 
     /**
      * Opens a counted reference to a well-known resource type,
-     * using a specific counted reference constructor and arguments.
-     * Calling code should close this reference when done with it.
-     * @param ctor a method that will create a transient, transparent counted reference.
-     * @param resourceInterface the primary resource interface.
-     * @param additionalInterfaces any additional supported interface.
-     * @return an open, closeable resource reference.
-     * @param <R> the resource type.
-     * @param <T> the transparent counted reference type.
-     */
-    public static <R extends Closeable, T extends TransparentCountedReference<R>> R openTransparent(
-            final BiFunction<Class<R>, Class<?>[], T> ctor, final Class<R> resourceInterface, final Class<?>... additionalInterfaces
-    ) {
-        return ctor.apply(resourceInterface, additionalInterfaces).getResource();
-    }
-
-    /**
-     * Opens a counted reference to a well-known resource type,
      * using the provided default constructor or supplier.
      * Calling code should close this reference when done with it.
+     *
      * @param opensCountedReference the counted reference constructor
+     * @param <R>                   the resource type.
+     * @param <T>                   the transparent counted reference type.
      * @return an open, closeable resource reference.
-     * @param <R> the resource type.
-     * @param <T> the transparent counted reference type.
      */
     @SingleUse
     public static <R extends Closeable, T extends TransparentCountedReference<R>> R openTransparent(

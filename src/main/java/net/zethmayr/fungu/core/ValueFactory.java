@@ -2,9 +2,7 @@ package net.zethmayr.fungu.core;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import static net.zethmayr.fungu.core.ExceptionFactory.becauseFactory;
 

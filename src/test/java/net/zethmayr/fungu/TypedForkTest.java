@@ -11,13 +11,20 @@ import static java.util.Collections.emptyList;
 import static net.zethmayr.fungu.ForkFactory.reForkOf;
 import static net.zethmayr.fungu.test.TestConstants.*;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.sameInstance;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-class TypedForkTest implements TestsReFork, TestsNuple {
+class TypedForkTest implements TestsTypedFork, TestsNuple {
 
     private TypedFork<?, ?> underTest;
+
+    @Test
+    @Override
+    public void arity_returnsSomeValue() {
+        underTest = reForkOf(0, 0);
+
+        assertThat(underTest, hasArityAtLeast(2));
+    }
 
     @Test
     void reForkOf_givenTypesAndNulls_returnsFork_withTypedNulls() {
@@ -118,8 +125,50 @@ class TypedForkTest implements TestsReFork, TestsNuple {
         assertNotEquals(underTest, distinct);
     }
 
+    @Test
     @Override
-    public Nuple underTest() {
+    public void with_givenNewValues_returnsSameConcreteType() {
+        final String originalValue = UNEXPECTED;
+        final Fork<String, String> underTest = reForkOf(originalValue, originalValue);
+        final Class<?> expectedClass = underTest.getClass();
+
+        final Fork<String, String> revalued = underTest.with(EXPECTED, SHIBBOLETH);
+
+        assertThat(revalued, instanceOf(expectedClass));
+        assertThat(underTest, hasValues(originalValue));
+        assertThat(revalued, hasValues(EXPECTED, SHIBBOLETH));
+    }
+
+    @Test
+    @Override
+    public void withBottom_givenNewBottomValue_returnsSameTopAndConcreteType() {
+        final String originalValue = SHIBBOLETH;
+        final Fork<String, String> underTest = reForkOf(originalValue, originalValue);
+
+        final Fork<String, String> revalued = underTest.withBottom(EXPECTED);
+
+        assertThat(revalued, instanceOf(underTest.getClass()));
+        assertThat(revalued, not(sameInstance(underTest)));
+        assertThat(revalued, hasValues(SHIBBOLETH, EXPECTED));
+        assertThat(underTest, hasValues(originalValue));
+    }
+
+    @Test
+    @Override
+    public void withTop_givenNewTopValue_returnsSameBottomAndConcreteType() {
+        final String originalValue = SHIBBOLETH;
+        final Fork<String, String> underTest = reForkOf(originalValue, originalValue);
+
+        final Fork<String, String> revalued = underTest.withTop(EXPECTED);
+
+        assertThat(revalued, instanceOf(underTest.getClass()));
+        assertThat(revalued, not(sameInstance(underTest)));
+        assertThat(revalued, hasValues(EXPECTED, SHIBBOLETH));
+        assertThat(underTest, hasValues(originalValue));
+    }
+
+    @Override
+    public Nuple nupleUnderTest() {
         return underTest;
     }
 
@@ -173,8 +222,8 @@ class TypedForkTest implements TestsReFork, TestsNuple {
     }
 
 
-   @Test
-   @Override
+    @Test
+    @Override
     public void nthMember_whenAbsent_givenLastIndex_returnsLastNull() {
         underTest = reForkOf(String.class, UNEXPECTED, String.class, NULL_STRING);
 

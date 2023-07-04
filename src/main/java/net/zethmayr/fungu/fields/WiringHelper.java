@@ -1,7 +1,5 @@
 package net.zethmayr.fungu.fields;
 
-import net.zethmayr.fungu.core.ExceptionFactory;
-
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
@@ -15,8 +13,7 @@ import java.util.stream.Stream;
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 import static net.zethmayr.fungu.DecisionHelper.anyNull;
-import static net.zethmayr.fungu.core.ExceptionFactory.becauseIllegal;
-import static net.zethmayr.fungu.core.ExceptionFactory.becauseStaticsOnly;
+import static net.zethmayr.fungu.core.ExceptionFactory.*;
 import static net.zethmayr.fungu.core.SuppressionConstants.LOCAL_CONVENTION;
 import static net.zethmayr.fungu.fields.EditsX.getCopyFunction;
 import static net.zethmayr.fungu.fields.HasX.getGetFunction;
@@ -45,6 +42,7 @@ public final class WiringHelper {
     public static <H extends HasX> void findGetters(
             final Class<H> encountered, final BiConsumer<Class<? extends HasX>, Method> getterHandler
     ) {
+        // doesn't use caches, at least not directly
         final Method[] candidates = Stream.of(encountered.getMethods())
                 .filter(m -> m.getDeclaringClass() == encountered)
                 .filter(m -> m.getParameterCount() == 0)
@@ -134,9 +132,9 @@ public final class WiringHelper {
 
     private static MethodHandle convertMethod(final Method reflected, final Lookup permissions) {
         try {
-            return MethodHandles.lookup().unreflect(reflected);
+            return permissions.unreflect(reflected);
         } catch (final IllegalAccessException iae) {
-            throw ExceptionFactory.becauseThrewBecauseIllegal(
+            throw becauseThrewBecauseIllegal(
                     "The method %s was not accessible per %s",
                     iae, reflected, permissions);
         }

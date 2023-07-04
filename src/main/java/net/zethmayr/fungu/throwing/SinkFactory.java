@@ -38,7 +38,7 @@ public final class SinkFactory {
         @Override
         public void raise() throws E {
             if (nonNull(thrown)) {
-                throw (E)thrown;
+                throw (E) thrown;
             }
         }
     }
@@ -58,6 +58,7 @@ public final class SinkFactory {
     /**
      * Base class for implementations which
      * have no use for a raise method.
+     *
      * @param <E> the exception type.
      */
     private static abstract class Immediately<E extends Exception> implements Sink<E> {
@@ -114,7 +115,7 @@ public final class SinkFactory {
         return new ThreadSafeSink<>();
     }
 
-    private static class ThreadSafeSink<E extends Exception> implements Sink<E> {
+    private static final class ThreadSafeSink<E extends Exception> implements Sink<E> {
 
         private final Object lock = new Object();
         private final TrivialSink<E> delegate = new TrivialSink<>();

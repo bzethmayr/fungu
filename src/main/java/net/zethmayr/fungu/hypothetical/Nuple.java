@@ -2,16 +2,18 @@ package net.zethmayr.fungu.hypothetical;
 
 import net.zethmayr.fungu.core.ExceptionFactory;
 import net.zethmayr.fungu.core.SuppressionConstants;
+import net.zethmayr.fungu.hypothetical.Nuple.NupleFactory.ArrayNuple;
 
 import java.util.Arrays;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.lang.System.arraycopy;
 import static java.util.Objects.nonNull;
-import static net.zethmayr.fungu.core.ExceptionFactory.*;
+import static net.zethmayr.fungu.core.ExceptionFactory.becauseFactory;
+import static net.zethmayr.fungu.core.ExceptionFactory.becauseIllegal;
+import static net.zethmayr.fungu.core.TypeHelper.defaultingType;
 
 /**
  * Superinterface of strongly-typed classes which also have finite, arbitrary n-tuple field semantics.
@@ -90,7 +92,7 @@ public interface Nuple {
      * @return a new arbitrary nuple.
      */
     static Nuple nupleOfValues(final Object... values) {
-        return new NupleFactory.ArrayNuple(values);
+        return new ArrayNuple(values);
     }
 
     /**
@@ -101,10 +103,7 @@ public interface Nuple {
      */
     static Class<?>[] inferredTypes(final Object... values) {
         return Stream.of(values)
-                .map(v -> nonNull(v)
-                        ? v.getClass()
-                        : Void.class
-                )
+                .map(defaultingType(Void.class))
                 .toArray(Class[]::new);
     }
 
@@ -126,7 +125,7 @@ public interface Nuple {
      * @return a new nuple.
      */
     static Nuple nupleOfTypedValues(final Object[] values, final Class<?>... types) {
-        return new NupleFactory.ArrayNuple(values, types);
+        return new ArrayNuple(values, types);
     }
 
     /**
@@ -138,7 +137,10 @@ public interface Nuple {
             throw becauseFactory();
         }
 
-        private record ArrayNuple(Object[] contents, Class<?>... types) implements Nuple {
+        static final class ArrayNuple implements Nuple {
+
+            final Object[] contents;
+            final Class<?>[] types;
 
             @Override
             public int arity() {
@@ -170,7 +172,7 @@ public interface Nuple {
                 return contents[requireInRange(index)];
             }
 
-            private ArrayNuple(Object[] contents, Class<?>... types) {
+            ArrayNuple(Object[] contents, Class<?>... types) {
                 if (contents.length == 0) {
                     this.contents = new Object[types.length];
                 } else {

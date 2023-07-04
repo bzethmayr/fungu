@@ -19,7 +19,7 @@ class ThrowingBiFunctionTest implements TestsSinkable {
     public void sinking_givenSink_givenTarget_whenNoException_raiseDoesNotThrow() {
         final Sink<ExampleCheckedException> sink = sink();
 
-        final BiFunction<String, String, String> sunk = sinking(SinkableHelper.sinkable(ThrowingBiFunctionTest::example), sink);
+        final BiFunction<String, String, String> sunk = sinking(sinkable(ThrowingBiFunctionTest::example), sink);
         final String result = sunk.apply("zyx", "ABC");
 
         assertEquals("XVT", result);
@@ -31,13 +31,13 @@ class ThrowingBiFunctionTest implements TestsSinkable {
     public void sinking_givenSink_givenTarget_whenException_raiseThrows() {
         final Sink<ExampleCheckedException> sink = sink();
 
-        final BiFunction<String, String, String> sunk = sinking(SinkableHelper.sinkable(ThrowingBiFunctionTest::example), sink);
+        final BiFunction<String, String, String> sunk = sinking(sinkable(ThrowingBiFunctionTest::example), sink);
         final String result = sunk.apply("abra", "cadabra");
 
         assertThrows(ExampleCheckedException.class, sink::raise);
     }
 
-    static String example(final String first, final String second) throws ExampleCheckedException {
+    private static String example(final String first, final String second) throws ExampleCheckedException {
         if (first.length() != second.length()) {
             throw new ExampleCheckedException("length mismatch");
         }

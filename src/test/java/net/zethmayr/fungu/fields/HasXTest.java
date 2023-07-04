@@ -1,6 +1,7 @@
 package net.zethmayr.fungu.fields;
 
 import net.zethmayr.fungu.core.SupplierFactory;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -11,6 +12,9 @@ import java.util.function.Supplier;
 import static net.zethmayr.fungu.core.SupplierFactory.from;
 import static net.zethmayr.fungu.test.TestConstants.EXPECTED;
 import static net.zethmayr.fungu.test.TestConstants.UNEXPECTED;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.arrayContaining;
+import static org.hamcrest.Matchers.arrayContainingInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class HasXTest {

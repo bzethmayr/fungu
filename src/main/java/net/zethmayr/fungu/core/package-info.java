@@ -1,5 +1,8 @@
 /**
  * Functionality reused throughout other packages -
- * exception and documentation conventions.
+ * for instance, exception and documentation conventions.
  */
+@Core
 package net.zethmayr.fungu.core;
+
+import net.zethmayr.fungu.core.declarations.Core;

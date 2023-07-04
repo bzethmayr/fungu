@@ -6,7 +6,8 @@ Functional glue.
 
 The goal throughout is to enable expressive compositional patterns.
 
-This provides predictable and tested implementations of common business use cases,
+This also can decouple conceptual from cyclomatic complexity, 
+by providing predictable and tested implementations of common business use cases,
 likely including something you find to be missing in the standard libraries.
 
 This one isn't aimed towards any particular application functionality,
@@ -19,7 +20,7 @@ which doesn't overlap with most of their use cases.
 
 #### Opinion on mutability
 This focuses on creation and mutation of objects, vs on immutable structures.
-You can use certainly immutable objects with the methods here,
+You can use certainly immutable objects with most of the methods here,
 and probably should if they're going to be shared.
 
 #### Dotlessness

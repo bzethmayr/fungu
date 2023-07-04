@@ -1,7 +1,5 @@
 package net.zethmayr.fungu.fields;
 
-import net.zethmayr.fungu.core.ExceptionFactory;
-
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;

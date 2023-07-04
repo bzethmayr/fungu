@@ -7,14 +7,23 @@ import org.junit.jupiter.api.Test;
 
 import static net.zethmayr.fungu.ForkFactory.forkOf;
 import static net.zethmayr.fungu.test.TestConstants.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ForkNupleTest implements TestsNuple {
 
     Nuple underTest;
 
-    public Nuple underTest() {
+    public Nuple nupleUnderTest() {
         return underTest;
+    }
+
+    @Test
+    @Override
+    public void arity_returnsSomeValue() {
+        underTest = forkOf(EXPECTED, EXPECTED);
+
+        assertThat(underTest, hasArityAtLeast(2));
     }
 
     @Test

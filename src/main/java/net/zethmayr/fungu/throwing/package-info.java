@@ -6,8 +6,11 @@
  * final Closeable resource = getResource();
  * final Sink thrown = sink();
  * Optional.of(resource)
- *    .ifPresent(sinking((ThrowingConsumer&lt;Closeable&gt;)Closeable::close, thrown));
+ *    .ifPresent(sinking(sinkable(Closeable::close), thrown));
  * thrown.raise();
  * </pre>
  */
+@LowerLevel
 package net.zethmayr.fungu.throwing;
+
+import net.zethmayr.fungu.core.declarations.LowerLevel;

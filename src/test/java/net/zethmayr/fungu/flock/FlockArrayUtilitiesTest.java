@@ -3,12 +3,20 @@ package net.zethmayr.fungu.flock;
 import org.junit.jupiter.api.Test;
 
 import static net.zethmayr.fungu.flock.FlockArrayUtilities.rangeCheck;
+import static net.zethmayr.fungu.test.TestHelper.invokeDefaultConstructor;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class FlockArrayUtilitiesTest {
+
+    @Test
+    void flockArrayUtilities_whenInstantiated_throwsInstead() {
+
+        assertThrows(UnsupportedOperationException.class, () ->
+
+                invokeDefaultConstructor(FlockArrayUtilities.class));
+    }
 
     @Test
     void rangeCheck_givenPrimitiveAndBoxedArray_whenLengthMismatch_throws() {
@@ -16,7 +24,7 @@ class FlockArrayUtilitiesTest {
 
                 rangeCheck(new long[3], new String[2]));
 
-        assertThat(thrown.getMessage(), containsString("dissimilar"));
+        assertThat(thrown.getMessage(), containsStringIgnoringCase("length disagreement"));
     }
 
     @Test
@@ -25,7 +33,7 @@ class FlockArrayUtilitiesTest {
 
                 rangeCheck(-1, new long[1]));
 
-        assertThat(thrown.getMessage(), stringContainsInOrder("-1", "range"));
+        assertThat(thrown.getMessage(), stringContainsInOrder("-1", "out of range"));
     }
 
     @Test

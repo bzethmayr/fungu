@@ -10,10 +10,9 @@ final class FlockArrayUtilities {
         throw becauseStaticsOnly();
     }
 
-
     static <T> void rangeCheck(final long[] primary, final T[] secondary) {
         if (primary.length != secondary.length) {
-            throw becauseDissimilar();
+            throw becauseLengthDisagreement();
         }
     }
 
@@ -29,7 +28,6 @@ final class FlockArrayUtilities {
         }
     }
 
-
     static Long[] box(final long[] primitives) {
         final Long[] boxed = new Long[primitives.length];
         IntStream.range(0, primitives.length)
@@ -44,7 +42,7 @@ final class FlockArrayUtilities {
         return becauseIllegal("ID %s is out of range", index);
     }
 
-    static IllegalArgumentException becauseDissimilar() {
-        return becauseIllegal("Cannot merge dissimilar vectors");
+    static IllegalArgumentException becauseLengthDisagreement() {
+        return becauseIllegal("Length disagreement");
     }
 }

@@ -5,6 +5,7 @@ import net.zethmayr.fungu.Testable;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static net.zethmayr.fungu.arc.TransparentCountedReference.openTransparent;
 import static net.zethmayr.fungu.core.ExceptionFactory.becauseUnsupported;
@@ -34,6 +35,17 @@ public class TransparentCountedReferenceTest implements TestsCountedReference<Te
     @Override
     public TestTransparentReference newReference() {
         throw becauseUnsupported("this would not be used");
+    }
+
+    @Test
+    public void close_whenReferenceSomehowObtained_throws() throws IOException {
+        final TestTransparentReference opacified = new TestTransparentReference();
+
+        try (final Testable used = opacified.getResource()) {
+            assertThrows(UnsupportedOperationException.class, opacified::close);
+
+            assertFalse(used.isClosed());
+        }
     }
 
     @Test

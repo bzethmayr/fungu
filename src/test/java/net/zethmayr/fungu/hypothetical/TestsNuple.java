@@ -1,84 +1,100 @@
 package net.zethmayr.fungu.hypothetical;
 
-import org.junit.jupiter.api.Test;
+import org.hamcrest.Matcher;
+
+import static net.zethmayr.fungu.core.SuppressionConstants.SPECIFICATION;
+import static net.zethmayr.fungu.test.MatcherFactory.has;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 
 public interface TestsNuple {
 
     /**
      * Provides the test field with
      * the instance under test.
+     *
      * @return the instance under test.
      */
-    Nuple underTest();
+    Nuple nupleUnderTest();
+
+    default Matcher<Nuple> hasArityAtLeast(final int minimum) {
+        return has(Nuple::arity, greaterThanOrEqualTo(minimum));
+    }
+
+    /**
+     * @see #hasArityAtLeast(int)
+     */
+    @SuppressWarnings(SPECIFICATION)
+    void arity_returnsSomeValue();
 
     default String firstString() {
-        return underTest().nthMember(0, String.class);
+        return nupleUnderTest().nthMember(0, String.class);
     }
 
     /**
      * @see #firstString()
      */
-    @Test
+    @SuppressWarnings(SPECIFICATION)
     void nthMember_whenPopulatedAndExpectedType_givenFirstIndex_returnsFirstValue();
 
     /**
      * @see #firstString()
      */
-    @Test
+    @SuppressWarnings(SPECIFICATION)
     void nthMember_whenPopulatedButNotExpectedType_givenFirstIndex_returnsFirstNull();
-    
-    @Test
+
+    @SuppressWarnings(SPECIFICATION)
     void nthMember_whenNoSuchIndex_throws();
 
     /**
      * Implementations with other than 2 members can override this.
+     *
      * @return the last String, if any.
      */
     default String lastString() {
-        return underTest().nthMember(1, String.class);
+        return nupleUnderTest().nthMember(1, String.class);
     }
 
     default Class<String> firstType() {
-        return underTest().nthType(0, String.class);
+        return nupleUnderTest().nthType(0, String.class);
     }
 
     /**
      * @see #lastString()
      */
-    @Test
+    @SuppressWarnings(SPECIFICATION)
     void nthMember_whenPopulatedAndExpectedType_givenLastIndex_returnsLastValue();
 
     /**
      * @see #lastString()
      */
-    @Test
+    @SuppressWarnings(SPECIFICATION)
     void nthMember_whenPopulatedButNotExpectedType_givenLastIndex_returnsLastNull();
 
     /**
      * @see #firstString()
      */
-    @Test
+    @SuppressWarnings(SPECIFICATION)
     void nthMember_whenAbsent_givenFirstIndex_returnsFirstNull();
 
     /**
      * @see #lastString()
      */
-    @Test
+    @SuppressWarnings(SPECIFICATION)
     void nthMember_whenAbsent_givenLastIndex_returnsLastNull();
 
     /**
      * @see #firstType()
      */
-    @Test
+    @SuppressWarnings(SPECIFICATION)
     void nthType_whenPopulatedAndExpected_givenFirstIndex_returnsFirstType();
 
     /**
      * @see #firstType()
      */
-    @Test
+    @SuppressWarnings(SPECIFICATION)
     void nthType_whenPopulatedAndUnexpected_givenFirstIndex_returnsNull();
-    
-    @Test
+
+    @SuppressWarnings(SPECIFICATION)
     void nthType_whenNoSuchIndex_throws();
 
     /**
@@ -88,7 +104,7 @@ public interface TestsNuple {
      *
      * @see #firstType()
      */
-    @Test
+    @SuppressWarnings(SPECIFICATION)
     void nthType_whenAbsent_givenFirstIndex_returnsNull();
 
     /**
@@ -96,6 +112,6 @@ public interface TestsNuple {
      * reifiable implementations can
      * validly return a known type.
      */
-    @Test
+    @SuppressWarnings(SPECIFICATION)
     void nthType_whenAbsent_givenLastIndex_returnsNull();
 }

@@ -1,6 +1,5 @@
 package net.zethmayr.fungu.fields;
 
-import net.zethmayr.fungu.test.TestConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -9,10 +8,18 @@ import java.util.function.Supplier;
 
 import static net.zethmayr.fungu.fields.WiringHelper.*;
 import static net.zethmayr.fungu.test.TestConstants.EXPECTED;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static net.zethmayr.fungu.test.TestHelper.invokeDefaultConstructor;
+import static org.junit.jupiter.api.Assertions.*;
 
 class WiringHelperTest {
+
+    @Test
+    void wiringHelper_whenInstantiated_throwsInstead() {
+
+        assertThrows(UnsupportedOperationException.class, () ->
+
+                invokeDefaultConstructor(WiringHelper.class));
+    }
 
     @Test
     void wireGetters_whenGetterFromHasSingle_wiresGetterByHandle() {
