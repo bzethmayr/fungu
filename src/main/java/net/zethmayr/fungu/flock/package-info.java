@@ -10,6 +10,9 @@
  * Since top traversal manipulates the most-significant bits starting from zero,
  * we can compare indices by number of trailing zeros then nearness to zero.
  * This gives an iteration order for serialization that corresponds to the top-traversal order.
+ * <p />
+ * The above is not straightforward to actually do, but,
+ * {@link java.lang.Integer#reverse} scatters indexes in a sufficiently similar way.
  */
 @HigherLevel
 @NotDone

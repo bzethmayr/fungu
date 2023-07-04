@@ -3,11 +3,20 @@ package net.zethmayr.fungu.flock;
 import org.junit.jupiter.api.Test;
 
 import static net.zethmayr.fungu.flock.FlockArrayUtilities.rangeCheck;
+import static net.zethmayr.fungu.test.TestHelper.invokeDefaultConstructor;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class FlockArrayUtilitiesTest {
+
+    @Test
+    void flockArrayUtilities_whenInstantiated_throwsInstead() {
+
+        assertThrows(UnsupportedOperationException.class, () ->
+
+                invokeDefaultConstructor(FlockArrayUtilities.class));
+    }
 
     @Test
     void rangeCheck_givenPrimitiveAndBoxedArray_whenLengthMismatch_throws() {

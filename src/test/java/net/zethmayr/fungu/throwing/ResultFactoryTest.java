@@ -1,11 +1,12 @@
 package net.zethmayr.fungu.throwing;
 
 import net.zethmayr.fungu.test.ExampleCheckedException;
-import net.zethmayr.fungu.throwing.Result;
-import net.zethmayr.fungu.throwing.SunkenException;
 import org.hamcrest.Matcher;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+
+import static net.zethmayr.fungu.PredicateFactory.NEVER;
 import static net.zethmayr.fungu.test.MatcherFactory.has;
 import static net.zethmayr.fungu.test.MatcherFactory.hasNull;
 import static net.zethmayr.fungu.test.TestConstants.*;
@@ -52,14 +53,22 @@ class ResultFactoryTest {
         assertNull(assertDoesNotThrow(result::getOrThrow));
     }
 
+    private Matcher<Result<?, ?>> hasException(final Class<? extends Exception> expected) {
+        return has(Result::getException, instanceOf(expected));
+    }
+
+    private ExampleCheckedException exampleException() {
+        return new ExampleCheckedException(EXPECTED);
+    }
+
     private Matcher<Result<?, ?>> hasExampleException() {
-        return has(Result::getException, instanceOf(ExampleCheckedException.class));
+        return hasException(ExampleCheckedException.class);
     }
 
     @Test
     void failure_givenException_hasExceptionAndGetThrows() {
 
-        final Result<String, ExampleCheckedException> result = failure(new ExampleCheckedException(EXPECTED));
+        final Result<String, ExampleCheckedException> result = failure(exampleException());
 
         assertThat(result, hasExampleException());
         assertThrows(SunkenException.class, result::get);
@@ -77,6 +86,16 @@ class ResultFactoryTest {
     }
 
     @Test
+    void evaluate_givenRunnable_whenException_returnsFailure() {
+
+        final Result<Void, Exception> result = evaluate((Runnable) () -> {
+            throw new RuntimeException();
+        });
+
+        assertThat(result, hasException(RuntimeException.class));
+    }
+
+    @Test
     void evaluate_givenSupplier_whenNoException_returnsSuccessWithValue() {
 
         final Result<String, Exception> result = evaluate(() -> EXPECTED);
@@ -86,9 +105,20 @@ class ResultFactoryTest {
     }
 
     @Test
+    void evaluate_givenSupplier_whenException_returnsFailure() {
+
+        final Result<String, Exception> result = evaluate(() -> Optional.of(EXPECTED)
+                .filter(NEVER)
+                .orElseThrow(RuntimeException::new)
+        );
+
+        assertThat(result, hasException(RuntimeException.class));
+    }
+
+    @Test
     void evaluateThrowing_givenRunnable_whenException_returnsFailure() {
 
-        final Result<String, ExampleCheckedException> result = evaluateThrowing(() -> {
+        final Result<Void, ExampleCheckedException> result = evaluateThrowing((ThrowingRunnable<ExampleCheckedException>) () -> {
             throw new ExampleCheckedException(EXPECTED);
         });
 
@@ -110,12 +140,9 @@ class ResultFactoryTest {
     @Test
     void evaluateThrowing_givenSupplier_whenException_returnsFailure() {
 
-        final Result<String, ExampleCheckedException> result = evaluateThrowing(() -> {
-            if (true) {
-                throw new ExampleCheckedException(EXPECTED);
-            }
-            return UNEXPECTED;
-        });
+        final Result<String, ExampleCheckedException> result = evaluateThrowing(() -> Optional.of(UNEXPECTED)
+                .filter(NEVER)
+                .orElseThrow(this::exampleException));
 
         assertThat(result, hasExampleException());
         assertThrows(SunkenException.class, result::get);

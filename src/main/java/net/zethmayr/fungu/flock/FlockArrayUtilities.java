@@ -10,7 +10,6 @@ final class FlockArrayUtilities {
         throw becauseStaticsOnly();
     }
 
-
     static <T> void rangeCheck(final long[] primary, final T[] secondary) {
         if (primary.length != secondary.length) {
             throw becauseLengthDisagreement();
@@ -28,7 +27,6 @@ final class FlockArrayUtilities {
             throw becauseOutOfRange(index);
         }
     }
-
 
     static Long[] box(final long[] primitives) {
         final Long[] boxed = new Long[primitives.length];

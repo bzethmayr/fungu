@@ -75,4 +75,11 @@ class SinkFactoryTest {
 
         assertEquals(thrown, caught);
     }
+
+    @Test
+    void threadSafeSink_givenNothing_returnsSink_whenNoAccept_raiseDoesNotThrow() {
+        final Sink<Exception> underTest = threadSafeSink();
+
+        assertDoesNotThrow(sink()::raise);
+    }
 }
